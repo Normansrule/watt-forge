@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; worker-src 'self'">
+<meta name="referrer" content="no-referrer">
+<title>Loss-budget explorer - Watt Forge</title>
+<meta name="description" content="Drag on-resistance, output charge, gate charge, frequency and load and watch every loss term and the total efficiency update live.">
+<link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../css/site.css">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+<meta name="theme-color" content="#1d6b4f">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar"><div class="inner">
+<a class="brand" href="../index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#1d6b4f"/><path d="M6 21 h5 v-10 h5 v10 h5 v-10 h5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>Watt Forge</a>
+<nav class="nav" aria-label="Main"><a href="../learn/fundamentals.html">Learn</a><a href="../tools/designer.html" aria-current="page">Tools</a><a href="../flagship.html">Flagship design</a><a href="../sources.html">Sources</a></nav>
+<button class="theme-btn" type="button">Dark theme</button>
+</div></header>
+<div class="safety" role="note"><div class="inner">Design and simulation reference only. Solar and battery hardware is dangerous: high voltage, stored energy, fire risk. Any physical build is at your own risk and needs proper lab safety practice. <a href="../safety.html">Read the safety note</a>.</div></div>
+<main id="main">
+<h1>Loss-budget explorer</h1>
+<p class="lede">A synchronous converter built around a transistor you define. Drag its on-resistance, output charge and gate charge, the switching frequency and the load, and watch which loss term wins. Start from a real part with the preset, then make it better or worse than anything you can buy.</p>
+<div class="bench">
+  <div class="bench-grid">
+    <div class="controls">
+      <div class="control"><label for="lx-top">Converter</label><select id="lx-top"><option value="buck">Buck 48 V to 12 V</option><option value="boost">Boost 24 V to 48 V</option><option value="four_switch">Four-switch 36 V to 48 V</option></select></div>
+      <div class="control"><label for="lx-preset">Start from</label><select id="lx-preset"></select></div>
+      <div class="control"><label for="lx-rds">R_ds(on) <output for="lx-rds"></output></label><input id="lx-rds" type="range" min="0.5" max="30" step="0.1" value="1.8"></div>
+      <div class="control"><label for="lx-qoss">Q_oss at 50 V <output for="lx-qoss"></output></label><input id="lx-qoss" type="range" min="5" max="400" step="1" value="85"></div>
+      <div class="control"><label for="lx-qg">Q_g <output for="lx-qg"></output></label><input id="lx-qg" type="range" min="2" max="200" step="1" value="23"></div>
+      <div class="control"><label for="lx-qrr">Q_rr <output for="lx-qrr"></output></label><input id="lx-qrr" type="range" min="0" max="600" step="2" value="0"></div>
+      <div class="control"><label for="lx-f">Switching frequency <output for="lx-f"></output></label><input id="lx-f" type="range" min="25" max="2000" step="25" value="300"></div>
+      <div class="control"><label for="lx-load">Load <output for="lx-load"></output></label><input id="lx-load" type="range" min="5" max="400" step="5" value="150"></div>
+    </div>
+    <div>
+      <div class="readouts">
+        <div class="readout big"><div class="k">Efficiency</div><div class="v" id="lx-eta">-</div></div>
+        <div class="readout"><div class="k">Total loss</div><div class="v" id="lx-loss">-</div></div>
+        <div class="readout"><div class="k">Biggest term</div><div class="v" id="lx-top-term">-</div></div>
+      </div>
+      <div class="bench-grid"><div id="lx-donut"></div><div id="lx-bars" class="bars"></div></div>
+      <div id="lx-fcurve"></div>
+    </div>
+  </div>
+</div>
+<p class="note">Model: first-order synchronous CCM converter (watt_forge/topologies.py, parity-tested). Gate drive 5 V, dead time 15 ns, junction 80 C. Output-charge voltage scaling uses a GaN-like exponent; the overlap time is derived from Q_gd ~ Q_g/8.</p>
+</main>
+<footer><div class="inner">Watt Forge: open-source converter design, MIT licensed. Runs entirely in your browser: no accounts, no analytics, designs stay in this browser's storage. Every efficiency figure on this site is cited with its test conditions on the <a href="../sources.html">Sources</a> page. Models are predictions, not measurements.</div></footer>
+<script type="module" src="../js/ui/ui.js"></script>
+<script type="module" src="../js/pages/losses-tool.js"></script>
+</body>
+</html>

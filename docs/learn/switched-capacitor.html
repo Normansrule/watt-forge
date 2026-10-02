@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; worker-src 'self'">
+<meta name="referrer" content="no-referrer">
+<title>3. Switched-capacitor and hybrid converters - Watt Forge</title>
+<meta name="description" content="Charge pumps, flying capacitors, the slow- and fast-switching limits, and how a small inductor makes a switched-capacitor converter lossless.">
+<link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../css/site.css">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+<meta name="theme-color" content="#1d6b4f">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar"><div class="inner">
+<a class="brand" href="../index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#1d6b4f"/><path d="M6 21 h5 v-10 h5 v10 h5 v-10 h5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>Watt Forge</a>
+<nav class="nav" aria-label="Main"><a href="../learn/fundamentals.html" aria-current="page">Learn</a><a href="../tools/designer.html">Tools</a><a href="../flagship.html">Flagship design</a><a href="../sources.html">Sources</a></nav>
+<button class="theme-btn" type="button">Dark theme</button>
+</div></header>
+<div class="safety" role="note"><div class="inner">Design and simulation reference only. Solar and battery hardware is dangerous: high voltage, stored energy, fire risk. Any physical build is at your own risk and needs proper lab safety practice. <a href="../safety.html">Read the safety note</a>.</div></div>
+<main id="main">
+<div class="prose">
+<p class="note">Lesson 3 of 7</p>
+<h1>Switched-capacitor and hybrid converters</h1>
+<p class="lede">Capacitors store energy far more densely than inductors. A switched-capacitor (SC) converter uses only switches and capacitors to divide or multiply a voltage by a fixed ratio. It hides one catch, an intrinsic loss that no small resistance can remove. A small inductor removes it.</p>
+
+<h2>Why capacitors: energy density, from this repo's own parts</h2>
+<p>Take two real parts from the flagship's bill of materials and compare the energy each stores per unit volume at its working point:</p>
+<table>
+<thead><tr><th>Part</th><th>Working point</th><th class="r">Energy</th><th class="r">Volume</th><th class="r">Density</th></tr></thead>
+<tbody>
+<tr><td>TDK C5750X7S2A106K230KB, 10 uF 100 V MLCC</td><td>30 V, ~6 uF after DC-bias derating</td><td class="r">2.7 mJ</td><td class="r">0.066 cm^3</td><td class="r">~41 mJ/cm^3</td></tr>
+<tr><td>Coilcraft XAL1010-472, 4.7 uH inductor</td><td>at its 25.4 A saturation current</td><td class="r">1.5 mJ</td><td class="r">0.98 cm^3</td><td class="r">~1.5 mJ/cm^3</td></tr>
+</tbody></table>
+<p>That is roughly 25x in the capacitor's favour, even after the ceramic loses 40 % of its capacitance to DC bias. Dimensions are the datasheet box sizes; E = CV^2/2 and LI^2/2. Converters that move most of their energy through capacitors can therefore be much smaller.</p>
+
+<h2>The 2:1 charge pump</h2>
+<p><b>Intuition.</b> A flying capacitor is charged in series with the output (Vin - Vout across it), then flipped in parallel with the output (Vout across it). In steady state it settles near Vin/2, and the output sits at Vin/2 minus a drop that behaves exactly like a resistor, R_out.</p>
+<p><b>The catch.</b> Every time a capacitor is connected to a different voltage, the charge that equalises them dissipates energy in the loop resistance. The amount depends on the voltage step, not on how small the resistance is. This is the slow-switching limit (SSL). At high frequency the capacitor never gets far from equilibrium, and the loss becomes ordinary I^2R in the switches, the fast-switching limit (FSL).</p>
+<div class="eqbox"><span class="eq">R_SSL = sum_i a_c,i^2 / (C_i * f)&nbsp;&nbsp;&nbsp;&nbsp;R_FSL = 2 * sum_i R_i * a_r,i^2&nbsp;&nbsp;&nbsp;&nbsp;R_out ~ sqrt(R_SSL^2 + R_FSL^2)</span></div>
+<dl class="symbols"><dt>a_c, a_r</dt><dd>charge through each capacitor / switch per period, normalised to the output charge (2:1 series-parallel: 1/2 each)</dd><dt>C_i, R_i</dt><dd>capacitances [F] and switch resistances [ohm]</dd><dt>f</dt><dd>switching frequency [Hz]</dd></dl>
+<div class="worked"><b>Worked example.</b> 48 V into a 23.5 V battery through one 10 uF flying capacitor at 100 kHz: R_SSL = 1/(4 x 10 uF x 100 kHz) = 0.25 ohm. The 0.5 V shortfall below Vin/2 drives (24 - 23.5)/0.25 = 2 A, and the loss is 2^2 x 0.25 = 1.0 W, however good the switches are. <span class="testref">tests/test_losses.py::test_switched_capacitor_limits (exact periodic solution, cross-checked by brute-force integration)</span></div>
+<p class="note">Source: Seeman &amp; Sanders, IEEE TPEL 2008, DOI 10.1109/TPEL.2007.915182.</p>
+</div>
+<div class="bench">
+  <div class="bench-grid">
+    <div class="controls">
+      <div class="control"><label for="sc-c">Flying capacitance <output for="sc-c"></output></label><input id="sc-c" type="range" min="1" max="100" step="1" value="10"></div>
+      <div class="control"><label for="sc-r">Switch resistance (each) <output for="sc-r"></output></label><input id="sc-r" type="range" min="1" max="50" step="1" value="10"></div>
+      <div class="control"><label for="sc-f">Frequency <output for="sc-f"></output></label><input id="sc-f" type="range" min="3" max="7" step="0.05" value="5"></div>
+      <div class="readouts">
+        <div class="readout"><div class="k">R_out (exact)</div><div class="v" id="sc-rout">-</div></div>
+        <div class="readout"><div class="k">Loss at 2 A</div><div class="v" id="sc-loss">-</div></div>
+        <div class="readout"><div class="k">Regime</div><div class="v" id="sc-reg">-</div></div>
+      </div>
+    </div>
+    <div id="sc-chart"></div>
+  </div>
+</div>
+<div class="prose">
+<h2>Hybrid: add a small inductor and the charge-sharing loss disappears</h2>
+<p><b>Intuition.</b> The SSL loss comes from connecting a capacitor straight to a different voltage. Put an inductor in the path and the capacitor charges through a current source instead: charge moves without a voltage step across a resistance, so the loss drops to ordinary conduction. This is "soft charging" (Lei &amp; Pilawa-Podgurski, IEEE TPEL 2015). A hybrid converter keeps the capacitor doing the voltage division and uses a small inductor only to shape the current.</p>
+<p><b>The three-level flying-capacitor leg</b> is the hybrid used by the flagship. Four switches and one flying capacitor replace a half-bridge. The switch node steps between 0, Vbus/2 and Vbus at twice the switching frequency. Each switch blocks only Vbus/2, and the inductor sees half-size steps at double frequency, so ripple falls up to four-fold. At D = 0.5 the node sits at Vbus/2 all the time: the inductor current stops rippling and the leg is a pure, soft-charged 2:1 SC converter. Drag the duty cycle and compare.</p>
+</div>
+<div class="bench">
+  <div class="bench-grid">
+    <div class="controls">
+      <div class="control"><label for="h-d">Duty cycle <output for="h-d"></output></label><input id="h-d" type="range" min="0.05" max="0.95" step="0.01" value="0.45"></div>
+      <div class="readouts">
+        <div class="readout"><div class="k">3-level ripple</div><div class="v" id="h-r3">-</div></div>
+        <div class="readout"><div class="k">2-level ripple</div><div class="v" id="h-r2">-</div></div>
+      </div>
+      <p class="note">60 V bus, 4.7 uH, 100 kHz per switch, buck leg. Ripple is peak-to-peak inductor current.</p>
+    </div>
+    <div id="h-chart"></div>
+  </div>
+</div>
+<div class="lessonnav"><a href="topologies.html">Lesson 2: the core topologies</a><a href="losses.html">Lesson 4: loss modelling</a></div>
+</main>
+<footer><div class="inner">Watt Forge: open-source converter design, MIT licensed. Runs entirely in your browser: no accounts, no analytics, designs stay in this browser's storage. Every efficiency figure on this site is cited with its test conditions on the <a href="../sources.html">Sources</a> page. Models are predictions, not measurements.</div></footer>
+<script type="module" src="../js/ui/ui.js"></script>
+<script type="module" src="../js/pages/sc.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; worker-src 'self'">
+<meta name="referrer" content="no-referrer">
+<title>Device comparison - Watt Forge</title>
+<meta name="description" content="Silicon vs GaN vs SiC in the same flagship converter: efficiency, loss breakdown and a junction-temperature estimate.">
+<link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../css/site.css">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+<meta name="theme-color" content="#1d6b4f">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar"><div class="inner">
+<a class="brand" href="../index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#1d6b4f"/><path d="M6 21 h5 v-10 h5 v10 h5 v-10 h5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>Watt Forge</a>
+<nav class="nav" aria-label="Main"><a href="../learn/fundamentals.html">Learn</a><a href="../tools/designer.html" aria-current="page">Tools</a><a href="../flagship.html">Flagship design</a><a href="../sources.html">Sources</a></nav>
+<button class="theme-btn" type="button">Dark theme</button>
+</div></header>
+<div class="safety" role="note"><div class="inner">Design and simulation reference only. Solar and battery hardware is dangerous: high voltage, stored energy, fire risk. Any physical build is at your own risk and needs proper lab safety practice. <a href="../safety.html">Read the safety note</a>.</div></div>
+<main id="main">
+<h1>Device comparison: Si vs GaN vs SiC</h1>
+<p class="lede">Drop each transistor into the same flagship converter at the same operating point and switching frequency, so the only thing that changes is the device. The thermal column turns the hottest switch's loss into a junction temperature with the thermal resistance you choose.</p>
+<div class="bench">
+  <div class="bench-grid">
+    <div class="controls">
+      <fieldset class="controls"><legend class="note">Devices</legend><div id="dc-list"></div></fieldset>
+      <div class="control"><label for="dc-vin">Panel voltage <output for="dc-vin"></output></label><input id="dc-vin" type="range" min="12" max="60" step="1" value="36"></div>
+      <div class="control"><label for="dc-load">Load <output for="dc-load"></output></label><input id="dc-load" type="range" min="10" max="100" step="5" value="75"></div>
+      <div class="control"><label for="dc-f">Switching frequency <output for="dc-f"></output></label><input id="dc-f" type="range" min="50" max="400" step="25" value="150"></div>
+      <div class="control"><label for="dc-rth">Junction-to-ambient thermal resistance per switch <output for="dc-rth"></output></label><input id="dc-rth" type="range" min="5" max="60" step="1" value="20"></div>
+      <div class="control"><label for="dc-ta">Ambient <output for="dc-ta"></output></label><input id="dc-ta" type="range" min="0" max="70" step="1" value="40"></div>
+      <p class="note">The thermal resistance is your assumption (board copper, heatsink, airflow), not a datasheet value. Junction temperature is a one-pass estimate; the loss model itself assumes 80 C.</p>
+    </div>
+    <div>
+      <div id="dc-bars"></div>
+      <div class="legend" id="dc-legend"></div>
+      <div class="tablewrap"><table id="dc-tab"><thead><tr><th>Device</th><th class="r">Efficiency</th><th class="r">Total loss</th><th class="r">Hottest switch</th><th class="r">Junction (est.)</th></tr></thead><tbody></tbody></table></div>
+      <p class="note">No SiC MOSFET exists near 100 V. The 650 V parts are included to show why; their low-voltage output charge is extrapolated from 400 V data (estimate).</p>
+    </div>
+  </div>
+</div>
+</main>
+<footer><div class="inner">Watt Forge: open-source converter design, MIT licensed. Runs entirely in your browser: no accounts, no analytics, designs stay in this browser's storage. Every efficiency figure on this site is cited with its test conditions on the <a href="../sources.html">Sources</a> page. Models are predictions, not measurements.</div></footer>
+<script type="module" src="../js/ui/ui.js"></script>
+<script type="module" src="../js/pages/devices-tool.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!-- title: Flagship: hybrid three-level GaN buck-boost | path: flagship.html | nav: flagship | script: pages/flagship.js | desc: The reference design: a 400 W hybrid three-level flying-capacitor GaN buck-boost for solar MPPT, with schematic, BOM, loss model, simulation and reference control code. -->
+<div class="prose">
+<h1>The flagship: a hybrid three-level GaN buck-boost for solar</h1>
+<p class="lede">A 400 W maximum-power-point-tracking converter from one 12-60 V solar panel to a 48 V battery, designed to be as efficient as the physics allows and honest about where it can't be.</p>
+<p class="pill warn">Reference design. Simulate and review before use; any build is at your own risk and needs high-voltage and stored-energy safety practice.</p>
+</div>
+<div class="tablewrap"><table>
+<thead><tr><th>Item</th><th>Choice</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>Topology</td><td>Four-switch buck-boost with each half-bridge replaced by a three-level flying-capacitor leg</td><td>Steps up and down; switches block Vbus/2; ripple falls up to 4x; soft-charged 2:1 switched-capacitor behaviour at the 1:2 ratio</td></tr>
+<tr><td>Switches</td><td>8x EPC2361, 100 V GaN, 1.0 mOhm max</td><td>Best weighted efficiency of six candidates in the model's sweep; 100 V margin for flying-cap precharge</td></tr>
+<tr><td>Disconnect and bypass</td><td>2x Innoscience INV100FQ030C bidirectional GaN</td><td>One channel blocks reverse polarity and back-feed; bypass removes all switching loss when the panel MPP equals the battery voltage</td></tr>
+<tr><td>Inductor</td><td>Coilcraft SER2918H-472, 4.7 uH, 2.86 mOhm</td><td>Copper loss dominates once three-level ripple shrinks the flux swing</td></tr>
+<tr><td>Flying capacitors</td><td>4x TDK 10 uF 100 V X7S per leg</td><td>~24 uF effective at 30 V bias; ripple under 10 % of Vbus/2 everywhere</td></tr>
+<tr><td>Control</td><td>STM32G474 (184 ps high-resolution timer); reference C state machine; optional iCE40 HDL modulator</td><td>Global sweep + adaptive perturb-and-observe, mode select with hysteresis, frequency from a loss-model lookup table</td></tr>
+</tbody></table></div>
+
+<div class="split">
+<figure class="figure"><img src="img/flagship_schematic.svg" alt="Annotated power-stage schematic: PV, bidirectional disconnect Q_IN, shunt, input capacitors, input three-level leg Q1-Q4 with CF1, inductor L1, output leg Q5-Q8 with CF2, output capacitors, shunt, battery, and bypass switch Q_BP" width="980" height="600"><figcaption>Annotated power stage. Full parts list below; rationale in hardware/flagship/DESIGN_RATIONALE.md.</figcaption></figure>
+<figure class="figure"><img src="img/anim_flagship.svg" alt="Animated three-level leg in buck mode" width="760" height="470"><figcaption>The input leg in buck mode: four switch states, node A at Vin/2 or Vin, twice the switching frequency.</figcaption></figure>
+</div>
+
+<h2>Operating-point explorer</h2>
+<div class="bench">
+  <div class="bench-grid">
+    <div class="controls">
+      <div class="control"><label for="fx-vin">Panel voltage <output for="fx-vin"></output></label><input id="fx-vin" type="range" min="12" max="60" step="0.5" value="56"></div>
+      <div class="control"><label for="fx-vout">Battery voltage <output for="fx-vout"></output></label><input id="fx-vout" type="range" min="40" max="58" step="0.5" value="48"></div>
+      <div class="control"><label for="fx-load">Load, % of rated <output for="fx-load"></output></label><input id="fx-load" type="range" min="5" max="100" step="5" value="100"></div>
+      <div class="readouts">
+        <div class="readout big"><div class="k">Predicted efficiency</div><div class="v" id="fx-eta">-</div></div>
+        <div class="readout"><div class="k">Mode</div><div class="v" id="fx-mode">-</div></div>
+        <div class="readout"><div class="k">Frequency</div><div class="v" id="fx-fs">-</div></div>
+        <div class="readout"><div class="k">Duties D1 / D2</div><div class="v" id="fx-d">-</div></div>
+        <div class="readout"><div class="k">Inductor current / ripple</div><div class="v" id="fx-il">-</div></div>
+        <div class="readout"><div class="k">Hard-switched edges per period</div><div class="v" id="fx-hard">-</div></div>
+        <div class="readout"><div class="k">Power</div><div class="v" id="fx-p">-</div></div>
+      </div>
+      <p class="note" id="fx-bypass"></p>
+    </div>
+    <div>
+      <div class="bench-grid"><div id="fx-donut"></div><div id="fx-bars" class="bars"></div></div>
+      <div id="fx-wave"></div>
+    </div>
+  </div>
+</div>
+
+<h2>Predicted efficiency across the input range</h2>
+<div id="fx-curve"></div>
+<div class="tablewrap"><table id="fx-weighted"><thead><tr><th class="r">Panel voltage</th><th class="r">CEC-weighted</th><th class="r">Euro-weighted</th><th class="r">Peak</th></tr></thead><tbody></tbody></table></div>
+
+<div class="prose">
+<h2>Where the physics says no</h2>
+<ul>
+<li><b>Low input voltage.</b> At 12 V the converter carries 15 A through four series switches, the inductor and the disconnect; conduction loss grows with the square of current, so it tops out near 97.4 %.</li>
+<li><b>Light load.</b> 0.55 W of housekeeping (controller, eight gate drivers, isolated supplies, sensing) is a quarter of the loss at 56 V, 400 W and most of it at 10 % load.</li>
+<li><b>Vin = Vout.</b> Both legs switch, a visible dip in the curve; the bypass switch removes it when the panel's maximum power point allows.</li>
+</ul>
+<h2>How far to trust these numbers</h2>
+<p>Three independent calculations agree. The analytic model, the time-domain circuit simulation (exact piecewise-linear periodic steady state with dead time, reverse conduction and unbalanced flying capacitors) and ngspice agree: model vs simulation within 0.15 points at every tested point, simulation vs ngspice within 0.005 points. That proves the arithmetic, not the hardware. The best measured GaN buck-boost results we could verify are 99.0 % (TI TIDA-010949, control power excluded) and 99.3 % (Heydari et al., APEC 2023, conditions partly verified). Treat predictions above ~99.3 % as claims awaiting a prototype. The parameters marked ESTIMATE in watt_forge/flagship/params.py are where reality will differ: thermal, dynamic on-resistance, Coss hysteresis, layout inductance.</p>
+</div>
+
+<h2>Design files</h2>
+<ul class="prose">
+<li><a data-repo="hardware/flagship/DESIGN_RATIONALE.md" href="#">Design rationale</a>: every choice and its numbers.</li>
+<li><a data-repo="hardware/flagship/BOM.csv" href="#">Bill of materials (CSV)</a> with verification status per line.</li>
+<li><a data-repo="hardware/flagship/loss_model.xlsx" href="#">Loss model spreadsheet</a> with live formulas, and the <a data-repo="notebooks/loss_model.ipynb" href="#">notebook</a>.</li>
+<li><a data-repo="watt_forge/flagship/sim.py" href="#">Circuit simulation</a> and the <a data-repo="hardware/flagship/spice/flagship_buck_56V_400W.cir" href="#">ngspice netlist</a>.</li>
+<li><a data-repo="hardware/flagship/control/wf_ctrl.c" href="#">Reference controller (C)</a> and <a data-repo="hardware/flagship/hdl/wf_pwm3l.v" href="#">three-level modulator (Verilog)</a>: reference only, simulate and review before use.</li>
+</ul>
+<h2>Bill of materials</h2>
+<div class="tablewrap"><table id="fx-bom"><thead><tr><th>Ref</th><th class="r">Qty</th><th>Part</th><th>Description</th><th>Status</th></tr></thead><tbody></tbody></table></div>

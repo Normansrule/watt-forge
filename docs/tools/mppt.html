@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; worker-src 'self'">
+<meta name="referrer" content="no-referrer">
+<title>MPPT sandbox - Watt Forge</title>
+<meta name="description" content="A simulated solar panel under clouds and partial shading driving the flagship's reference MPPT controller, tick by tick, in your browser.">
+<link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../css/site.css">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+<meta name="theme-color" content="#1d6b4f">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar"><div class="inner">
+<a class="brand" href="../index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#1d6b4f"/><path d="M6 21 h5 v-10 h5 v10 h5 v-10 h5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>Watt Forge</a>
+<nav class="nav" aria-label="Main"><a href="../learn/fundamentals.html">Learn</a><a href="../tools/designer.html" aria-current="page">Tools</a><a href="../flagship.html">Flagship design</a><a href="../sources.html">Sources</a></nav>
+<button class="theme-btn" type="button">Dark theme</button>
+</div></header>
+<div class="safety" role="note"><div class="inner">Design and simulation reference only. Solar and battery hardware is dangerous: high voltage, stored energy, fire risk. Any physical build is at your own risk and needs proper lab safety practice. <a href="../safety.html">Read the safety note</a>.</div></div>
+<main id="main">
+<h1>MPPT sandbox</h1>
+<p class="lede">The flagship's reference controller runs here tick by tick: the same state machine as the C and Python versions. It drives a simulated panel through clouds, partial shading and a filling battery. Watch it sweep, track, change mode and drop into bypass.</p>
+<div class="bench">
+  <div class="bench-grid">
+    <div class="controls">
+      <div class="control"><label for="mp-scn">Scenario</label>
+        <select id="mp-scn">
+          <option value="shade">Partial shading arrives, then clears</option>
+          <option value="clouds">Passing clouds</option>
+          <option value="morning">Sunrise ramp</option>
+          <option value="cv">Battery fills up (constant-voltage limit)</option>
+          <option value="bypass">Panel MPP matches the battery (bypass)</option>
+          <option value="manual">Manual: use the sliders below</option>
+        </select></div>
+      <div class="control"><label for="mp-g">Irradiance (manual) <output for="mp-g"></output></label><input id="mp-g" type="range" min="50" max="1100" step="25" value="900"></div>
+      <div class="control"><label for="mp-sh">Shaded substring (manual) <output for="mp-sh"></output></label><input id="mp-sh" type="range" min="0" max="100" step="5" value="100"></div>
+      <div class="control"><label for="mp-speed">Speed <output for="mp-speed"></output></label><input id="mp-speed" type="range" min="5" max="200" step="5" value="40"></div>
+      <div class="row"><button class="act" type="button" id="mp-run">Pause</button><button class="ghost" type="button" id="mp-reset">Restart</button></div>
+      <div class="readouts">
+        <div class="readout"><div class="k">State</div><div class="v" id="mp-state">-</div></div>
+        <div class="readout"><div class="k">Mode</div><div class="v" id="mp-mode">-</div></div>
+        <div class="readout"><div class="k">Switching frequency</div><div class="v" id="mp-fs">-</div></div>
+        <div class="readout"><div class="k">Time</div><div class="v" id="mp-t">-</div></div>
+        <div class="readout big"><div class="k">Tracking efficiency (energy)</div><div class="v" id="mp-trk">-</div></div>
+        <div class="readout"><div class="k">Delivered to battery</div><div class="v" id="mp-e">-</div></div>
+      </div>
+      <p class="note">One tick = 1 ms. The first second is the start-up wait, so tracking efficiency counts from the first sweep. Converter efficiency comes from the flagship loss model, sampled every 50 ms.</p>
+    </div>
+    <div><div id="mp-pchart"></div><div id="mp-vchart"></div></div>
+  </div>
+</div>
+</main>
+<footer><div class="inner">Watt Forge: open-source converter design, MIT licensed. Runs entirely in your browser: no accounts, no analytics, designs stay in this browser's storage. Every efficiency figure on this site is cited with its test conditions on the <a href="../sources.html">Sources</a> page. Models are predictions, not measurements.</div></footer>
+<script type="module" src="../js/ui/ui.js"></script>
+<script type="module" src="../js/pages/mppt.js"></script>
+</body>
+</html>

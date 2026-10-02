@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; worker-src 'self'">
+<meta name="referrer" content="no-referrer">
+<title>2. The core topologies - Watt Forge</title>
+<meta name="description" content="Buck, boost, buck-boost, SEPIC, Cuk, flyback and the four-switch buck-boost, each with an animated schematic, waveforms and a design lesson.">
+<link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../css/site.css">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+<meta name="theme-color" content="#1d6b4f">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar"><div class="inner">
+<a class="brand" href="../index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#1d6b4f"/><path d="M6 21 h5 v-10 h5 v10 h5 v-10 h5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>Watt Forge</a>
+<nav class="nav" aria-label="Main"><a href="../learn/fundamentals.html" aria-current="page">Learn</a><a href="../tools/designer.html">Tools</a><a href="../flagship.html">Flagship design</a><a href="../sources.html">Sources</a></nav>
+<button class="theme-btn" type="button">Dark theme</button>
+</div></header>
+<div class="safety" role="note"><div class="inner">Design and simulation reference only. Solar and battery hardware is dangerous: high voltage, stored energy, fire risk. Any physical build is at your own risk and needs proper lab safety practice. <a href="../safety.html">Read the safety note</a>.</div></div>
+<main id="main">
+<div class="prose">
+<p class="note">Lesson 2 of 7</p>
+<h1>The core topologies</h1>
+<p class="lede">Every classic DC-DC converter is the same three ingredients: a switch, a diode or second switch, and an inductor. They are arranged so that volt-second balance forces a particular ratio. Pick one below: the schematic animates the current path in each switch state, and the chart shows the conversion ratio with and without resistance.</p>
+<p>Each drawing shows the <b>synchronous</b> version: the diode is replaced by a second transistor, the synchronous rectifier, which removes the diode's forward drop. At low voltage that drop alone would cost several percent. A diode version is identical except S2 becomes a diode that conducts on its own.</p>
+</div>
+<div class="bench">
+  <div class="row" role="radiogroup" aria-label="Topology" id="t-pick"></div>
+  <div class="bench-grid">
+    <div>
+      <h3 id="t-name"></h3>
+      <div class="eqbox"><span class="eq" id="t-eq"></span></div>
+      <div id="t-lesson" class="note"></div>
+      <div class="controls">
+        <div class="control"><label for="t-d">Duty cycle D <output for="t-d"></output></label><input id="t-d" type="range" min="0.02" max="0.95" step="0.01" value="0.5"></div>
+        <div class="control"><label for="t-r">Load resistance R <output for="t-r"></output></label><input id="t-r" type="range" min="0.5" max="20" step="0.5" value="5"></div>
+        <div class="control"><label for="t-ron">Switch + inductor resistance <output for="t-ron"></output></label><input id="t-ron" type="range" min="0" max="200" step="5" value="50"></div>
+      </div>
+      <div class="readouts"><div class="readout"><div class="k">Ideal M</div><div class="v" id="t-mi">-</div></div><div class="readout"><div class="k">With resistance</div><div class="v" id="t-ml">-</div></div></div>
+    </div>
+    <div>
+      <figure class="figure"><img id="t-img" alt="" width="720" height="430"></figure>
+      <div id="t-chart"></div>
+    </div>
+  </div>
+</div>
+<div class="prose">
+<h2>Why the lossy ratio collapses</h2>
+<p>With resistance, the boost and buck-boost ratios peak and then fall as D approaches 1. The inductor current is Iout/(1 - D), so its I^2R loss grows as 1/(1 - D)^2 while the ideal gain grows only as 1/(1 - D). Past the peak, more duty cycle means less output. That is the real reason single-stage boost converters stop at roughly 4-6x, and why high step-up designs turn to switched capacitors (lesson 3).</p>
+<div class="eqbox"><span class="eq">boost:&nbsp; M = 1/(1-D) * 1 / (1 + (R_on + R_L) / ((1-D)^2 * R))</span></div>
+<div class="worked"><b>Worked example.</b> D = 0.5, R = 10 ohm, R_on + R_L = 50 mOhm: M = 2/1.02 = 1.961 instead of 2. <span class="testref">tests/test_ratios.py::test_lossy_ratio_worked_example, and checked against ngspice in test_lossy_buck_ratio_against_ngspice</span></div>
+<h2>The four-switch buck-boost, and where the flagship starts</h2>
+<p>The non-inverting four-switch buck-boost joins a buck half-bridge to a boost half-bridge through one inductor. In buck mode the output leg just stays on, and in boost mode the input leg does. Only near Vin = Vout do both legs switch, and that costs efficiency (the flagship's efficiency curve dips there). The flagship keeps this skeleton and replaces each half-bridge with a three-level flying-capacitor leg; lesson 3 explains why.</p>
+</div>
+<div class="lessonnav"><a href="fundamentals.html">Lesson 1: fundamentals</a><a href="switched-capacitor.html">Lesson 3: switched-capacitor and hybrid</a></div>
+</main>
+<footer><div class="inner">Watt Forge: open-source converter design, MIT licensed. Runs entirely in your browser: no accounts, no analytics, designs stay in this browser's storage. Every efficiency figure on this site is cited with its test conditions on the <a href="../sources.html">Sources</a> page. Models are predictions, not measurements.</div></footer>
+<script type="module" src="../js/ui/ui.js"></script>
+<script type="module" src="../js/pages/topologies.js"></script>
+</body>
+</html>

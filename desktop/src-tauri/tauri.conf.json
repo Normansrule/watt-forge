@@ -1,0 +1,49 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Watt Forge",
+  "version": "0.1.0",
+  "identifier": "io.github.wattforge.desktop",
+  "build": {
+    "frontendDist": "../../docs"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Watt Forge",
+        "width": 1280,
+        "height": 860,
+        "minWidth": 380,
+        "minHeight": 600
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'",
+      "freezePrototype": true
+    },
+    "withGlobalTauri": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Education",
+    "shortDescription": "Power-converter design from first principles",
+    "longDescription": "Watt Forge: converter lessons, live loss models, a hybrid GaN buck-boost reference design, and a sandboxed ngspice runner. Works offline.",
+    "publisher": "Aleksander Norman",
+    "copyright": "MIT licensed",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "linux": {
+      "deb": {
+        "depends": [
+          "ngspice"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; worker-src 'self'">
+<meta name="referrer" content="no-referrer">
+<title>1. Fundamentals - Watt Forge</title>
+<meta name="description" content="What a switching converter is: duty cycle, volt-second balance, charge balance, CCM and DCM, each with an interactive visual.">
+<link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../css/site.css">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+<meta name="theme-color" content="#1d6b4f">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar"><div class="inner">
+<a class="brand" href="../index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#1d6b4f"/><path d="M6 21 h5 v-10 h5 v10 h5 v-10 h5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>Watt Forge</a>
+<nav class="nav" aria-label="Main"><a href="../learn/fundamentals.html" aria-current="page">Learn</a><a href="../tools/designer.html">Tools</a><a href="../flagship.html">Flagship design</a><a href="../sources.html">Sources</a></nav>
+<button class="theme-btn" type="button">Dark theme</button>
+</div></header>
+<div class="safety" role="note"><div class="inner">Design and simulation reference only. Solar and battery hardware is dangerous: high voltage, stored energy, fire risk. Any physical build is at your own risk and needs proper lab safety practice. <a href="../safety.html">Read the safety note</a>.</div></div>
+<main id="main">
+<div class="prose">
+<p class="note">Lesson 1 of 7</p>
+<h1>Fundamentals</h1>
+<p class="lede">A switching converter moves energy in packets. A switch chops the input, an inductor or capacitor holds the energy for a fraction of a microsecond, and the average of the chopped waveform becomes the output. Nothing in the ideal circuit dissipates power, which is why converters can reach 99 %.</p>
+
+<h2>Duty cycle</h2>
+<p><b>Intuition.</b> Flip a switch on for part of each period and off for the rest. The fraction of time it is on is the duty cycle, D. If the switch connects a node to Vin while on and to ground while off, the node's average voltage is D x Vin. A buck converter is exactly that, followed by a low-pass filter (an inductor and a capacitor) that keeps the average and throws away the chopping.</p>
+<div class="eqbox"><span class="eq">D = t_on / Ts = t_on * fs&nbsp;&nbsp;&nbsp;&nbsp;&lt;v_sw&gt; = D * Vin</span></div>
+<dl class="symbols"><dt>t_on</dt><dd>switch on-time [s]</dd><dt>Ts, fs</dt><dd>switching period [s] and frequency [Hz], Ts = 1/fs</dd><dt>&lt;v_sw&gt;</dt><dd>period-average of the switch-node voltage [V]</dd></dl>
+<div class="worked"><b>Worked example.</b> 48 V to 12 V needs D = 12/48 = 0.25: at 200 kHz (Ts = 5 us) the switch is on for 1.25 us of every 5 us. <span class="testref">Checked in tests/test_ratios.py::test_ideal_ratios_worked_examples</span></div>
+</div>
+
+<h2>Volt-second balance</h2>
+<div class="prose">
+<p><b>Intuition.</b> An inductor's current changes at a rate v/L. If the current is to come back to where it started every period (steady state), the voltage across the inductor must average to zero: the positive "volt-seconds" while the switch is on must equal the negative volt-seconds while it is off. That single rule gives every conversion ratio in lesson 2. Drag D below: when the two shaded areas are equal, the inductor current closes on itself.</p>
+<div class="eqbox"><span class="eq">&lt;v_L&gt; = (1/Ts) * integral(v_L dt) = 0&nbsp;&nbsp;&nbsp;=&gt;&nbsp;&nbsp;&nbsp;D*(Vin - Vout) - (1 - D)*Vout = 0&nbsp;&nbsp;&nbsp;=&gt;&nbsp;&nbsp;&nbsp;Vout = D*Vin (buck)</span></div>
+<dl class="symbols"><dt>v_L</dt><dd>voltage across the inductor [V]</dd><dt>Vin, Vout</dt><dd>input and output voltage [V]</dd></dl>
+</div>
+<div class="bench">
+  <div class="bench-grid">
+    <div class="controls">
+      <div class="control"><label for="vs-vin">Vin <output for="vs-vin"></output></label><input id="vs-vin" type="range" min="12" max="60" step="1" value="48"></div>
+      <div class="control"><label for="vs-vout">Vout (held by the output capacitor) <output for="vs-vout"></output></label><input id="vs-vout" type="range" min="3" max="40" step="1" value="12"></div>
+      <div class="control"><label for="vs-d">Duty cycle D <output for="vs-d"></output></label><input id="vs-d" type="range" min="0.05" max="0.95" step="0.01" value="0.35"></div>
+      <div class="readouts">
+        <div class="readout"><div class="k">Net volt-seconds / period</div><div class="v" id="vs-res">-</div></div>
+        <div class="readout"><div class="k">Balancing D</div><div class="v" id="vs-dbal">-</div></div>
+      </div>
+      <p class="note" id="vs-msg"></p>
+    </div>
+    <div><div id="vs-vl"></div><div id="vs-il"></div></div>
+  </div>
+</div>
+
+<div class="prose">
+<h2>Charge balance</h2>
+<p><b>Intuition.</b> The dual rule for capacitors: a capacitor's voltage changes at i/C, so in steady state its current must average to zero. Charge delivered while the switch is off must equal charge drawn while it is on. For a boost converter's output capacitor, the load draws Iout all the time, and the inductor refills it only during (1 - D). So the inductor current must be Iout/(1 - D), which is why boost converters carry large inductor currents at high step-up.</p>
+<div class="eqbox"><span class="eq">&lt;i_C&gt; = 0&nbsp;&nbsp;&nbsp;=&gt;&nbsp;&nbsp;&nbsp;-Iout*D + (IL - Iout)*(1 - D) = 0&nbsp;&nbsp;&nbsp;=&gt;&nbsp;&nbsp;&nbsp;IL = Iout / (1 - D)</span></div>
+<div class="worked"><b>Worked example.</b> A boost at D = 0.5 delivering 2 A needs 4 A of inductor current. <span class="testref">tests/test_ratios.py::test_volt_second_and_charge_balance</span></div>
+
+<h2>Continuous vs discontinuous conduction (CCM / DCM)</h2>
+<p><b>Intuition.</b> The inductor current is a triangle riding on its average. At light load the triangle's valley can reach zero. With a diode as the second switch, the current then stops for part of the period: discontinuous conduction mode (DCM). The conversion ratio then depends on the load, not just on D. A synchronous converter (a second transistor instead of a diode) lets the current go negative instead. It stays in "forced CCM", which costs some circulating current but, as lesson 4 shows, can buy soft switching.</p>
+<div class="eqbox"><span class="eq">K = 2L / (R*Ts)&nbsp;&nbsp;&nbsp;CCM when K &gt; K_crit(D):&nbsp;&nbsp;buck 1 - D,&nbsp;&nbsp;boost D(1 - D)^2,&nbsp;&nbsp;buck-boost (1 - D)^2</span></div>
+<dl class="symbols"><dt>K</dt><dd>dimensionless inductance [-]</dd><dt>R</dt><dd>load resistance [ohm]</dd><dt>L</dt><dd>inductance [H]</dd></dl>
+<div class="worked"><b>Check.</b> At exactly K = K_crit the DCM ratio formula equals the CCM ratio for every D, so the two regimes join without a jump. <span class="testref">tests/test_ratios.py::test_ccm_dcm_boundary_is_continuous</span></div>
+</div>
+<div class="bench">
+  <div class="bench-grid">
+    <div class="controls">
+      <div class="control"><label for="k-top">Topology</label><select id="k-top"><option value="buck">Buck</option><option value="boost">Boost</option><option value="buck_boost">Buck-boost</option></select></div>
+      <div class="control"><label for="k-l">Inductance <output for="k-l"></output></label><input id="k-l" type="range" min="1" max="100" step="1" value="15"></div>
+      <div class="control"><label for="k-r">Load resistance <output for="k-r"></output></label><input id="k-r" type="range" min="0.5" max="50" step="0.5" value="5"></div>
+      <div class="control"><label for="k-d">Duty cycle <output for="k-d"></output></label><input id="k-d" type="range" min="0.05" max="0.95" step="0.01" value="0.4"></div>
+      <p class="note">Switching frequency 200 kHz. Below the curve the diode converter is in DCM; the dot is your operating point.</p>
+      <div class="readouts"><div class="readout"><div class="k">Conduction mode</div><div class="v" id="k-mode">-</div></div><div class="readout"><div class="k">Diode-converter ratio M</div><div class="v" id="k-m">-</div></div></div>
+    </div>
+    <div id="k-chart"></div>
+  </div>
+</div>
+<div class="lessonnav"><a href="../index.html">Home</a><a href="topologies.html">Lesson 2: the core topologies</a></div>
+</main>
+<footer><div class="inner">Watt Forge: open-source converter design, MIT licensed. Runs entirely in your browser: no accounts, no analytics, designs stay in this browser's storage. Every efficiency figure on this site is cited with its test conditions on the <a href="../sources.html">Sources</a> page. Models are predictions, not measurements.</div></footer>
+<script type="module" src="../js/ui/ui.js"></script>
+<script type="module" src="../js/pages/fundamentals.js"></script>
+</body>
+</html>

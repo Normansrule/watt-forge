@@ -1,0 +1,37 @@
+<!-- title: SPICE runner | path: tools/spice.html | nav: tools | script: pages/spice.js | desc: Inspect and run SPICE netlists for the worked examples and the flagship power stage. The web version shows stored ngspice results; the desktop app runs ngspice live in a sandbox. -->
+<h1>SPICE runner</h1>
+<p class="lede">Every number on this site comes from an analytic model. This page checks that model against a circuit simulator. Pick a netlist, read it, change it, and compare what ngspice measures with what the model predicts.</p>
+<p><span class="pill" id="sp-env">Checking environment...</span></p>
+<div class="bench">
+  <div class="bench-grid wide-left">
+    <div class="controls">
+      <div class="control"><label for="sp-preset">Netlist</label><select id="sp-preset"></select></div>
+      <p class="note" id="sp-about"></p>
+      <div class="control"><label for="sp-net">Netlist text (untrusted input: checked before every run)</label>
+        <textarea id="sp-net" class="mono" rows="18" spellcheck="false" maxlength="262144"></textarea></div>
+      <div class="row"><button type="button" class="act" id="sp-run">Run</button><button type="button" class="ghost" id="sp-check">Check only</button><button type="button" class="ghost" id="sp-reset">Restore preset</button></div>
+      <p class="err" id="sp-err" role="alert"></p>
+    </div>
+    <div>
+      <div class="readouts">
+        <div class="readout big"><div class="k">Guard</div><div class="v" id="sp-guard">-</div></div>
+        <div class="readout"><div class="k">Source of result</div><div class="v" id="sp-src">-</div></div>
+        <div class="readout"><div class="k">Run time</div><div class="v" id="sp-time">-</div></div>
+      </div>
+      <div class="tablewrap"><table id="sp-tab"><thead><tr><th>Measurement</th><th class="r">ngspice</th><th class="r">Model / analytic</th><th class="r">Difference</th></tr></thead><tbody></tbody></table></div>
+      <details><summary>Raw ngspice output</summary><pre id="sp-raw" class="mono">Run a netlist in the desktop app to see its raw output here.</pre></details>
+    </div>
+  </div>
+</div>
+
+<h2>Why the flagship netlists read higher than the model</h2>
+<div class="prose">
+  <p>The flagship netlists use ideal switches with the GaN on-resistance and no dead time, so ngspice sees conduction losses only: switch R<sub>ds(on)</sub>, inductor DCR, flying-capacitor ESR and PCB copper. The full model adds output-capacitance, dead-time, gate-drive, core and housekeeping losses on top. The test that matters is that ngspice agrees with the conduction-only result from the repository's own circuit simulator to within 0.005 percentage points. It does, in <code>tests/test_flagship_sim.py</code>, which runs on every commit.</p>
+  <p>Switching losses are not left to SPICE. Ideal-switch models cannot represent output-capacitance energy, and vendor GaN SPICE models are not redistributable here. They come from datasheet charge and energy figures instead; see <a href="{base}learn/losses.html">loss modelling</a>.</p>
+</div>
+
+<h2>The sandbox</h2>
+<div class="prose">
+  <p>A SPICE netlist is code. An ngspice <code>.control</code> block can run shell commands, and <code>.include</code> can read any file. Every netlist therefore passes the same guard, implemented three times and tested against one shared set of cases. The guard runs in this page as JavaScript, in the desktop app as Rust before ngspice starts, and in Python for the test suite. It rejects control blocks, includes, libraries, unknown elements and dot commands, oversized files, and transient runs over five million points. ngspice then runs in batch mode in an empty temporary folder with a cleared environment, a 60-second limit and a 1 MB output cap. Details: <a data-repo="docs/SECURITY_MODEL.md" href="#">SECURITY_MODEL.md</a>.</p>
+  <p>The web version never executes a netlist. For an unmodified preset it shows the ngspice result stored when the repository was built. Edited netlists run only in the desktop app.</p>
+</div>

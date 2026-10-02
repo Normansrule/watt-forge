@@ -1,0 +1,51 @@
+name: desktop
+# Builds the desktop installers on Linux, macOS and Windows. Runs by hand (Actions tab > desktop >
+# Run workflow) and is called by release.yml for every v* tag, which attaches the installers to the release.
+on:
+  workflow_dispatch:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            label: linux-x64
+          - os: windows-2022
+            label: windows-x64
+          - os: macos-14
+            label: macos-arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+      - name: Linux system packages for Tauri (+ ngspice and Xvfb for the smoke test)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libayatana-appindicator3-dev patchelf ngspice xvfb
+      - name: Install the Tauri CLI
+        run: cargo install tauri-cli --version "^2" --locked
+      - name: Build installers
+        working-directory: desktop/src-tauri
+        run: cargo tauri build
+      - name: End-to-end smoke test (page -> IPC -> netlist guard -> ngspice)
+        if: runner.os == 'Linux'
+        run: WATTFORGE_SMOKE=1 xvfb-run -a desktop/src-tauri/target/release/watt-forge-desktop | tee smoke.log && grep -q "WATTFORGE_SMOKE PASS" smoke.log
+      - name: Collect installers
+        shell: bash
+        run: |
+          mkdir -p out
+          B=desktop/src-tauri/target/release/bundle
+          for f in $B/deb/*.deb $B/rpm/*.rpm $B/appimage/*.AppImage $B/msi/*.msi $B/nsis/*.exe $B/dmg/*.dmg; do
+            [ -f "$f" ] && cp "$f" out/
+          done
+          ls -la out
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: desktop-${{ matrix.label }}
+          path: out/
+          if-no-files-found: error

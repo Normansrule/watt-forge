@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; worker-src 'self'">
+<meta name="referrer" content="no-referrer">
+<title>Converter design from first principles - Watt Forge</title>
+<meta name="description" content="Open-source power-converter design platform: first-principles lessons, live loss models, and a hybrid GaN buck-boost reference design for solar.">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/site.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta name="theme-color" content="#1d6b4f">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar"><div class="inner">
+<a class="brand" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#1d6b4f"/><path d="M6 21 h5 v-10 h5 v10 h5 v-10 h5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>Watt Forge</a>
+<nav class="nav" aria-label="Main"><a href="learn/fundamentals.html">Learn</a><a href="tools/designer.html">Tools</a><a href="flagship.html">Flagship design</a><a href="sources.html">Sources</a></nav>
+<button class="theme-btn" type="button">Dark theme</button>
+</div></header>
+<div class="safety" role="note"><div class="inner">Design and simulation reference only. Solar and battery hardware is dangerous: high voltage, stored energy, fire risk. Any physical build is at your own risk and needs proper lab safety practice. <a href="safety.html">Read the safety note</a>.</div></div>
+<main id="main">
+<section class="hero">
+  <div>
+    <h1>Design switching converters from first principles, down to the last milliwatt.</h1>
+    <p class="lede">Watt Forge teaches DC-DC converter design from duty cycle to expert-level loss modelling, lets you size and validate your own design against an efficiency target, and ends in a complete reference design: a hybrid three-level GaN buck-boost for solar.</p>
+    <p class="note">Everything on this site runs in your browser. The same equations run in Python, are checked by the test suite, and are cross-checked against a circuit simulator and ngspice.</p>
+    <div class="row">
+      <a class="tool" href="learn/fundamentals.html"><b>Start the course</b><span>Seven lessons, fundamentals to frontier</span></a>
+      <a class="tool" href="tools/designer.html"><b>Design a converter</b><span>Size L and C, see the loss budget</span></a>
+    </div>
+  </div>
+  <div class="hero-bench" aria-labelledby="hb-title">
+    <h2 id="hb-title" class="note">The flagship converter, live: drag the panel voltage</h2>
+    <div class="control"><label for="h-vin">Panel voltage <output for="h-vin"></output></label><input id="h-vin" type="range" min="12" max="60" step="0.5" value="36"></div>
+    <div class="control"><label for="h-load">Load, % of rated <output for="h-load"></output></label><input id="h-load" type="range" min="5" max="100" step="5" value="75"></div>
+    <div class="readouts">
+      <div class="readout big"><div class="k">Predicted efficiency</div><div class="v" id="h-eta">-</div></div>
+      <div class="readout"><div class="k">Mode</div><div class="v" id="h-mode">-</div></div>
+      <div class="readout"><div class="k">Switching frequency</div><div class="v" id="h-fs">-</div></div>
+      <div class="readout"><div class="k">Output power</div><div class="v" id="h-p">-</div></div>
+    </div>
+    <div id="h-donut"></div>
+    <p class="note">Output fixed at 48 V. Model prediction including 0.55 W housekeeping; see the <a href="flagship.html">flagship page</a> for what it does not include.</p>
+  </div>
+</section>
+
+<h2>The course: a converter topology odyssey</h2>
+<ol class="odyssey">
+  <li><span class="n">1</span><a href="learn/fundamentals.html">Fundamentals</a><p>Duty cycle, volt-second and charge balance, continuous vs discontinuous conduction.</p></li>
+  <li><span class="n">2</span><a href="learn/topologies.html">The core topologies</a><p>Buck, boost, buck-boost, SEPIC, Cuk, flyback and the four-switch buck-boost, animated.</p></li>
+  <li><span class="n">3</span><a href="learn/switched-capacitor.html">Switched-capacitor and hybrid</a><p>Charge pumps, flying capacitors, and why a small inductor makes them lossless.</p></li>
+  <li><span class="n">4</span><a href="learn/losses.html">Loss modelling</a><p>Every loss term with its equation, a worked example and a live budget.</p></li>
+  <li><span class="n">5</span><a href="learn/devices.html">Devices</a><p>Silicon vs GaN vs SiC, and what bidirectional GaN switches change.</p></li>
+  <li><span class="n">6</span><a href="learn/control.html">Control and MPPT</a><p>PWM, perturb-and-observe, partial shading, and the flagship state machine.</p></li>
+  <li><span class="n">7</span><a href="learn/frontier.html">The frontier</a><p>Kilovolts to phone-level: hybrid SC, multilevel and piezoelectric converters, with verified records.</p></li>
+</ol>
+
+<h2>Design and validation tools</h2>
+<div class="tools">
+  <a class="tool" href="tools/designer.html"><b>Topology designer</b><span>Pick a topology and a spec; get L, C, duty, and efficiency.</span></a>
+  <a class="tool" href="tools/losses.html"><b>Loss-budget explorer</b><span>Drag Rds(on), Coss, Qg, frequency and load; watch every term move.</span></a>
+  <a class="tool" href="tools/validator.html"><b>Efficiency-curve validator</b><span>Set a target curve; see where a design falls short and why.</span></a>
+  <a class="tool" href="tools/devices.html"><b>Device comparison</b><span>Si vs GaN vs SiC in the same converter, with a thermal estimate.</span></a>
+  <a class="tool" href="tools/mppt.html"><b>MPPT sandbox</b><span>Clouds and shading over a PV panel; watch the controller track.</span></a>
+  <a class="tool" href="tools/spice.html"><b>SPICE runner</b><span>Read and run the netlists behind the numbers; live ngspice in the desktop app.</span></a>
+</div>
+
+<h2>The flagship reference design</h2>
+<div class="split">
+  <div class="prose">
+    <p>A 400 W maximum-power-point-tracking converter from a 12-60 V solar panel to a 48 V battery. Each half-bridge of a four-switch buck-boost is replaced by a three-level flying-capacitor leg on 100 V GaN. The switches block half the voltage, the inductor ripple falls up to four-fold, and near a 1:2 ratio the leg behaves as a soft-charged switched-capacitor stage. A bidirectional GaN switch disconnects the panel, and another bypasses conversion when the panel already sits at battery voltage.</p>
+    <p>The design package includes an annotated schematic, a bill of materials with real part numbers, the loss model as a spreadsheet and notebook, and a circuit simulation that reproduces the efficiency curve. It also has the control state machine in C and an HDL modulator, both labelled reference-only.</p>
+    <p><a href="flagship.html">Open the flagship design</a></p>
+  </div>
+  <figure class="figure"><img src="img/anim_flagship.svg" alt="Animated three-level flying-capacitor leg: current paths through Q1-Q4 and the flying capacitor, with node voltage and inductor current waveforms" width="760" height="470"></figure>
+</div>
+</main>
+<footer><div class="inner">Watt Forge: open-source converter design, MIT licensed. Runs entirely in your browser: no accounts, no analytics, designs stay in this browser's storage. Every efficiency figure on this site is cited with its test conditions on the <a href="sources.html">Sources</a> page. Models are predictions, not measurements.</div></footer>
+<script type="module" src="js/ui/ui.js"></script>
+<script type="module" src="js/pages/home.js"></script>
+</body>
+</html>

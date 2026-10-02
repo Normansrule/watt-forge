@@ -1,0 +1,179 @@
+{
+  "_about": "Canonical reference list. docs/REFERENCES.md and the site's Sources page are generated from this file (scripts/make_web_data.py). Every efficiency figure carries its exact test conditions. 'status' records how it was verified.",
+  "last_verified": "2026-09-30",
+  "references": [
+    {
+      "id": "erickson2020", "category": "Textbook",
+      "title": "Fundamentals of Power Electronics, 3rd ed.", "authors": "R. W. Erickson, D. Maksimovic",
+      "venue": "Springer", "year": 2020, "doi": "10.1007/978-3-030-43881-4",
+      "url": "https://link.springer.com/book/10.1007/978-3-030-43881-4",
+      "headline": null, "conditions": null,
+      "summary": "The standard text for conversion ratios, volt-second and charge balance, CCM/DCM boundaries and averaged loss models used throughout the lessons.",
+      "status": "VERIFIED (publisher page)"
+    },
+    {
+      "id": "venkatachalam2002", "category": "Magnetics",
+      "title": "Accurate prediction of ferrite core loss with nonsinusoidal waveforms using only Steinmetz parameters",
+      "authors": "K. Venkatachalam, C. R. Sullivan, T. Abdallah, H. Tacca", "venue": "IEEE COMPEL", "year": 2002,
+      "doi": "10.1109/CIPE.2002.1196712", "url": "https://doi.org/10.1109/CIPE.2002.1196712",
+      "headline": null, "conditions": null,
+      "summary": "The improved Generalized Steinmetz Equation (iGSE) used for all inductor core-loss estimates here.",
+      "status": "VERIFIED (OpenAlex, DOI redirect)"
+    },
+    {
+      "id": "seeman2008", "category": "Switched capacitor",
+      "title": "Analysis and Optimization of Switched-Capacitor DC-DC Converters", "authors": "M. D. Seeman, S. R. Sanders",
+      "venue": "IEEE Trans. Power Electronics 23(2):841-851", "year": 2008, "doi": "10.1109/TPEL.2007.915182",
+      "url": "https://doi.org/10.1109/TPEL.2007.915182", "headline": null, "conditions": null,
+      "summary": "Canonical slow-switching / fast-switching limit (SSL/FSL) output-resistance analysis of switched-capacitor converters.",
+      "status": "VERIFIED (Berkeley publication list, DOI redirect)"
+    },
+    {
+      "id": "lei2015", "category": "Switched capacitor",
+      "title": "A General Method for Analyzing Resonant and Soft-Charging Operation of Switched-Capacitor Converters",
+      "authors": "Y. Lei, R. C. N. Pilawa-Podgurski", "venue": "IEEE Trans. Power Electronics 30(10):5650-5664", "year": 2015,
+      "doi": "10.1109/TPEL.2014.2377738", "url": "https://doi.org/10.1109/TPEL.2014.2377738", "headline": null, "conditions": null,
+      "summary": "Shows when adding a single inductor removes the charge-sharing loss (soft charging), the principle behind the flagship's SC region.",
+      "status": "VERIFIED (Illinois Experts, DOI redirect)"
+    },
+    {
+      "id": "jones2016", "category": "Devices",
+      "title": "Review of Commercial GaN Power Devices and GaN-Based Converter Design Challenges",
+      "authors": "E. A. Jones, F. Wang, D. Costinett", "venue": "IEEE J. Emerging and Selected Topics in Power Electronics 4(3):707-719",
+      "year": 2016, "doi": "10.1109/JESTPE.2016.2582685", "url": "https://doi.org/10.1109/JESTPE.2016.2582685",
+      "headline": null, "conditions": null,
+      "summary": "Survey of commercial GaN transistors and practical design issues (layout parasitics, gate drive, dynamic on-resistance, thermal).",
+      "status": "VERIFIED (bibliographic)"
+    },
+    {
+      "id": "daluz2024", "category": "Hybrid SC for PV",
+      "title": "Switched-Capacitor-Based Hybrid Resonant Bidirectional Buck-Boost Converter for Improving Energy Harvesting in Photovoltaic Systems",
+      "authors": "C. M. A. da Luz, K. F. A. Okada, A. S. Morais, F. L. Tofoli, E. R. Ribeiro", "venue": "MDPI Sustainability 16(22):10142",
+      "year": 2024, "doi": "10.3390/su162210142", "url": "https://www.mdpi.com/2071-1050/16/22/10142",
+      "headline": "96 % and 99.2 % (NOT converter efficiency)",
+      "conditions": "Figures are extracted PV power divided by the string's theoretical maximum (energy harvest). Scenario 1: 38.4 W -> 57.6 W; scenario 2: 36 W -> 49.6 W; 1050 W/m^2, 45 C, four-module string of 20 W and 10 W modules, variable-resistor load, 50 kHz, Infineon IPP082N10NF2 MOSFETs. No standalone converter efficiency is reported.",
+      "summary": "A differential-power-processing converter shuffles power between mismatched PV modules so the string recovers most of its available power.",
+      "status": "VERIFIED (publisher page and full text)"
+    },
+    {
+      "id": "liang2012", "category": "Hybrid SC for PV",
+      "title": "High efficiency switched capacitor buck-boost converter for PV application", "authors": "Z. Liang, A. Q. Huang, R. Guo",
+      "venue": "IEEE APEC, pp. 1951-1958", "year": 2012, "doi": "10.1109/APEC.2012.6166090", "url": "https://ieeexplore.ieee.org/document/6166090/",
+      "headline": "92.5 %",
+      "conditions": "240 W prototype, 200 V output from a 60-cell module (Vmpp 30 V); fixed-gain resonant SC stage plus a partial-power buck-boost for MPPT; auxiliary inductor for ZVS. Switching frequency and devices not verified.",
+      "summary": "An SC stage does most of the step-up while a small buck-boost trims it for MPPT. The '96-97 % SC buck-boost for PV' figure sometimes quoted could NOT be verified; this is the closest verified paper.",
+      "status": "VERIFIED (OpenAlex; conditions partly verified)"
+    },
+    {
+      "id": "aron2025", "category": "Bidirectional GaN",
+      "title": "Analysis and Design of a Condensed Buck-Boost Converter Utilizing Monolithic Bidirectional GaN Switches",
+      "authors": "A. Aron, P. Eliat-Eliat, J. Buonato, S. Coday (MIT)", "venue": "IEEE Trans. Power Electronics 41(1):1226-1240",
+      "year": 2025, "doi": "10.1109/TPEL.2025.3604743", "url": "https://coday.mit.edu/wp-content/uploads/2025/09/Aron_TPEL_2025.pdf",
+      "headline": "ML-CoBB 95.4 % buck / 97.5 % boost peak; passive weight 2.85x lower than the NIBB",
+      "conditions": "1 kW-rated 3-level prototype, 200-500 V in, 270 V out, 100 kHz; 95.4 % at 500 -> 270 V and 97.5 % at 200 -> 270 V, both at 880 W. Return-path-inductor variant 97.3 % / 98.1 %. Bidirectional switch: Transphorm TP65F060WS (preliminary part). MEASURED EFFICIENCY EXCLUDES GATE-DRIVE LOSS.",
+      "summary": "Replacing some switches in a flying-capacitor buck-boost with single-chip bidirectional GaN switches cuts inductor weight about 3x at 95-98 % efficiency. News coverage: Power Electronics News, 7 Apr 2026.",
+      "status": "VERIFIED (author PDF, OpenAlex)"
+    },
+    {
+      "id": "tida010949", "category": "GaN buck-boost",
+      "title": "600W Solar Power Optimizer Reference Design Based on GaN (TIDA-010949)", "authors": "Texas Instruments",
+      "venue": "TI design guide TIDUF99", "year": null, "doi": null, "url": "https://www.ti.com/lit/pdf/tiduf99",
+      "headline": "99.0 % peak switching; 99.5-99.6 % in pass-through",
+      "conditions": "Four-switch buck-boost with 2x LMG2100R026 GaN half-bridges; 15-80 V in, 0-80 V out, up to 300 kHz. 99.0 % at 600 W, 15 A output (98.6 % at 18 A). 99.5 % (33 V in) and 99.6 % (43 V in) are a SHORT/pass-through state, not conversion. C2000 control-card power is subtracted (auxiliary power excluded). Not peer reviewed.",
+      "summary": "A vendor reference design: a GaN solar power optimizer at about 99 % while actually converting.",
+      "status": "VERIFIED (TI document)"
+    },
+    {
+      "id": "heydari2023", "category": "GaN buck-boost",
+      "title": "A 400W, 99.3% Efficient GaN Buck-Boost Converter", "authors": "M. Heydari, Q. Huang, A. Q. Huang",
+      "venue": "IEEE APEC, pp. 2223-2230", "year": 2023, "doi": "10.1109/APEC43580.2023.10131616",
+      "url": "https://doi.org/10.1109/APEC43580.2023.10131616", "headline": "up to 99.3 % measured",
+      "conditions": "500 kHz GaN buck-boost, 400 W; ~110 W/cm^3 with one inductor choice, ~35 W/cm^3 with another. Input/output voltages, the exact 99.3 % operating point, device part numbers and gate-drive inclusion were NOT verified (full text inaccessible).",
+      "summary": "A GaN buck-boost at 500 kHz with up to 99.3 % measured efficiency; treat as the best verified ceiling for this class, conditions pending.",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "stolt2023", "category": "Piezoelectric",
+      "title": "A Spurious-Free Piezoelectric Resonator Based 3.2 kW DC-DC Converter for EV On-Board Chargers",
+      "authors": "E. Stolt, W. D. Braun, K. Nguyen, V. Chulukhadze, R. Lu, J. Rivas-Davila", "venue": "IEEE Trans. Power Electronics 39(2):2478-2488",
+      "year": 2024, "doi": "10.1109/TPEL.2023.3334211", "url": "https://ieeexplore.ieee.org/document/10323185/",
+      "headline": "3.2 kW at 97.7 %; 5.7 kW/cm^3 component power density",
+      "conditions": "450 V -> 220 V, four paralleled piezoelectric converters, ring-electrode resonator suppressing spurious modes. Resonator material, switching frequency, devices and gate-drive inclusion not verified from the abstract. Research stage.",
+      "summary": "Four vibrating-crystal converters in parallel deliver EV-charger power with no magnetic inductor.",
+      "status": "VERIFIED (abstract only)"
+    },
+    {
+      "id": "boles2021", "category": "Piezoelectric",
+      "title": "Enumeration and Analysis of DC-DC Converter Implementations Based on Piezoelectric Resonators",
+      "authors": "J. D. Boles, J. J. Piel, D. J. Perreault", "venue": "IEEE Trans. Power Electronics 36(1):129-145", "year": 2021,
+      "doi": "10.1109/TPEL.2020.3004147", "url": "https://per.mit.edu/wp-content/uploads/2023/10/JPtpelJan21_Boles_PiezoConvEnumeration.pdf",
+      "headline": ">99 % peak (abstract); >= 96 % over a wide range",
+      "conditions": "Prototype 100-200 V in, 40-80 V out, up to ~25 W, 115-135 kHz; APC 790 resonator (APC 844 material, radial mode); EPC2019 GaN; TI UCC27611 driver. The >99 % operating point could not be confirmed as measured (an appendix gives >99 % at 100 V -> 60 V, 4 W, apparently calculated); the measured plot read (Vout = 40 V) shows ~90-98 %. Gate-drive inclusion not stated. Research stage.",
+      "summary": "Systematically lists every way to build a DC-DC converter around a piezoelectric resonator and identifies the high-efficiency switching sequences.",
+      "status": "PARTIAL (bibliographic VERIFIED; the >99 % figure is treated as calculated)"
+    },
+    {
+      "id": "ko2026", "category": "Piezoelectric",
+      "title": "A hybrid piezoelectric resonator-based DC-DC converter", "authors": "J.-Y. Ko, W.-C. B. Liu, P. P. Mercier (UC San Diego)",
+      "venue": "Nature Communications 17:4054", "year": 2026, "doi": "10.1038/s41467-026-70494-0",
+      "url": "https://www.nature.com/articles/s41467-026-70494-0",
+      "headline": "96.2 % peak at 48 V -> 4.8 V",
+      "conditions": "48 V in, 4.8 V out, 150 mA (~0.72 W); 115-129 kHz, inductive region; APC 841 PZT disc 20 mm x 0.25 mm; IC in 180 nm BCD; open-loop control from a C2000 DSP. Gate-drive and control power inclusion not stated. Reports 4x baseline output current and 81.6 % lower resonator current. Research stage.",
+      "summary": "Embedded flying capacitors move the piezo stage's best ratio from 2:1 to 3:1, reaching ~9:1 step-down efficiently.",
+      "status": "VERIFIED (publisher page and PMC full text)"
+    },
+    {
+      "id": "das2019", "category": "High-ratio hybrid SC",
+      "title": "A Regulated 48V-to-1V/100A 90.9%-Efficient Hybrid Converter for POL Applications in Data Centers and Telecommunication Systems",
+      "authors": "R. Das, H.-P. Le", "venue": "IEEE APEC, pp. 1997-2001", "year": 2019, "doi": "10.1109/APEC.2019.8722246",
+      "url": "https://par.nsf.gov/servlets/purl/10094095",
+      "headline": "90.9 % peak at 48 V -> 1 V",
+      "conditions": "Dual-phase multi-inductor hybrid; 90.9 % at 1 V / 30 A (100 A max); 93.6 % at 2 V / 35 A; 95.3 % at 5 V / 40 A; EPC2015c and EPC2023, 1 uH inductors; GATE-DRIVE LOSSES INCLUDED; 440 W/in^3 at 1 V. Frequency partly verified (333 kHz optimal, 167 kHz measured setting).",
+      "summary": "An inductor-plus-capacitor hybrid steps 48 V directly to 1 V for processors at about 91 %.",
+      "status": "VERIFIED (author PDF)"
+    },
+    {
+      "id": "cao2023", "category": "Flying-capacitor buck-boost",
+      "title": "A Three-Level Buck-Boost Converter With Planar Coupled Inductor and Common-Mode Noise Suppression",
+      "authors": "Y. Cao, Y. Bai, V. Mitrovic, B. Fan, D. Dong, R. Burgos, D. Boroyevich, R. S. K. Moorthy, M. Chinthavali",
+      "venue": "IEEE Trans. Power Electronics 38(9):10483-10500", "year": 2023, "doi": "10.1109/TPEL.2023.3279987",
+      "url": "https://doi.org/10.1109/TPEL.2023.3279987", "headline": "up to 25 dB common-mode noise reduction; 30 % lower winding loss",
+      "conditions": "30 kHz, 50 kW bidirectional platform; efficiency figure and exact voltages NOT verified.",
+      "summary": "A three-level (flying-capacitor) buck-boost at 50 kW with a planar coupled inductor: the same topology family as the flagship, at 100x the power.",
+      "status": "PARTIAL"
+    },
+    {
+      "id": "rothmund2019", "category": "Medium voltage",
+      "title": "99% Efficient 10 kV SiC-Based 7 kV/400 V DC Transformer for Future Data Centers",
+      "authors": "D. Rothmund, T. Guillod, D. Bortis, J. W. Kolar", "venue": "IEEE J. Emerging and Selected Topics in Power Electronics 7(2)",
+      "year": 2019, "doi": "10.1109/JESTPE.2018.2886139", "url": "https://ieeexplore.ieee.org/document/8571261/",
+      "headline": "99.0 % DC-DC",
+      "conditions": "7 kV DC -> 400 V DC, 25 kW, 48 kHz; 10 kV SiC MOSFETs (Wolfspeed CPM3-10000-0350) and 3x paralleled 1.2 kV C2M0025120D; 99.0 % from 13 to 25.6 kW measured calorimetrically INCLUDING auxiliaries and cooling; 98.1 % for the full solid-state transformer. A series-resonant DC transformer, NOT a flying-capacitor multilevel converter.",
+      "summary": "A single 10 kV SiC stage turns medium-voltage DC into 400 V with about 1 % loss.",
+      "status": "VERIFIED (author PDF)"
+    },
+    {
+      "id": "pvsyst_weights", "category": "Solar weighting",
+      "title": "European or CEC efficiency (PVsyst documentation)", "authors": "PVsyst SA", "venue": "PVsyst help", "year": 2026,
+      "doi": null, "url": "https://www.pvsyst.com/help/component-database/grid-inverters/grid-inverters-main-interface/grid-inverters-efficiency-curve/european-or-cec-efficiency.html",
+      "headline": "CEC = .04n10+.05n20+.12n30+.21n50+.53n75+.05n100; Euro = .03n5+.06n10+.13n20+.10n30+.48n50+.20n100",
+      "conditions": "Secondary source; the primary CEC/Sandia protocol document was not reached. CEC also averages over three DC voltages (not verified here).",
+      "summary": "Weights used for the weighted-efficiency numbers.",
+      "status": "VERIFIED (secondary source)"
+    },
+    {
+      "id": "infineon_bds", "category": "Bidirectional GaN",
+      "title": "CoolGaN BDS 650 V G5 (IGLT65R055B2, IGLT65R110B2) and 40 V BDS (IGK048B041S)", "authors": "Infineon Technologies",
+      "venue": "product pages / datasheets", "year": 2025, "doi": null, "url": "https://www.infineon.com/part/IGLT65R055B2",
+      "headline": null, "conditions": "650 V TOLT parts announced May 2025; 40 V WLCSP part (4.8 mOhm max) available 2026. Neither class fits a 60 V solar input, which is why the flagship uses the Innoscience 100 V part.",
+      "summary": "Commercial monolithic bidirectional GaN switches.", "status": "VERIFIED"
+    },
+    {
+      "id": "innoscience_bds", "category": "Bidirectional GaN",
+      "title": "VGaN bidirectional 100 V switch INV100FQ030C", "authors": "Innoscience", "venue": "product page", "year": 2024,
+      "doi": null, "url": "https://www.innoscience.com/product/detail/11/549", "headline": null,
+      "conditions": "100 V, 2.5/3.2 mOhm, 100 A, FCQFN 4x6 mm; product page only; gate structure to be confirmed in the datasheet.",
+      "summary": "The only verified 100 V-class monolithic bidirectional GaN switch; used for the flagship's disconnect and bypass.", "status": "VERIFIED (product page)"
+    }
+  ]
+}

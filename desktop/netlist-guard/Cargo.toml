@@ -1,0 +1,8 @@
+[package]
+name = "netlist-guard"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Validates untrusted SPICE netlists before they reach ngspice (Rust port of watt_forge.spice.check_netlist)."
+
+[dependencies]

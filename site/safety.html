@@ -1,0 +1,16 @@
+<!-- title: Safety | path: safety.html | nav: none | desc: Safety note: Watt Forge is a design and simulation reference, not a build-and-energize guide. -->
+<div class="prose">
+<h1>Safety</h1>
+<p class="lede">Watt Forge is a design and simulation reference. It is not a guide to building and energising hardware, and nothing here replaces training, supervision and proper lab practice.</p>
+<h2>Why solar and battery hardware is dangerous</h2>
+<ul>
+<li><b>A panel cannot be switched off.</b> In daylight its terminals are live, up to about 50 V for one 72-cell panel and far more in a string. Covering it does not reliably make it safe.</li>
+<li><b>Batteries deliver enormous fault currents.</b> A 48 V lithium pack can deliver hundreds to thousands of amps into a short, welding tools and starting fires. Fuse the battery connection, close to the battery.</li>
+<li><b>Capacitors stay charged.</b> The flying and bus capacitors hold their charge after power is removed. Measure before touching.</li>
+<li><b>Flying-capacitor converters have a start-up hazard.</b> Before the flying capacitors are precharged to half the bus, a single switch can see the full input voltage. Always bring a three-level stage up slowly, from a current-limited bench supply, with the precharge verified on an oscilloscope.</li>
+<li><b>GaN gates are fragile.</b> A few volts of overshoot above the absolute maximum destroys the device, and a destroyed switch can fail short.</li>
+</ul>
+<h2>What the reference code is and isn't</h2>
+<p>The C controller and the Verilog modulator document the control logic precisely and are tested in simulation. They are not production firmware: they have no watchdog, no hardware abstraction, no calibration and no certification. Every file is marked "reference, simulate and review before use".</p>
+<p>Any physical build is at your own risk.</p>
+</div>

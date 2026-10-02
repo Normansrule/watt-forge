@@ -1,0 +1,32 @@
+<!-- title: MPPT sandbox | path: tools/mppt.html | nav: tools | script: pages/mppt.js | desc: A simulated solar panel under clouds and partial shading driving the flagship's reference MPPT controller, tick by tick, in your browser. -->
+<h1>MPPT sandbox</h1>
+<p class="lede">The flagship's reference controller runs here tick by tick: the same state machine as the C and Python versions. It drives a simulated panel through clouds, partial shading and a filling battery. Watch it sweep, track, change mode and drop into bypass.</p>
+<div class="bench">
+  <div class="bench-grid">
+    <div class="controls">
+      <div class="control"><label for="mp-scn">Scenario</label>
+        <select id="mp-scn">
+          <option value="shade">Partial shading arrives, then clears</option>
+          <option value="clouds">Passing clouds</option>
+          <option value="morning">Sunrise ramp</option>
+          <option value="cv">Battery fills up (constant-voltage limit)</option>
+          <option value="bypass">Panel MPP matches the battery (bypass)</option>
+          <option value="manual">Manual: use the sliders below</option>
+        </select></div>
+      <div class="control"><label for="mp-g">Irradiance (manual) <output for="mp-g"></output></label><input id="mp-g" type="range" min="50" max="1100" step="25" value="900"></div>
+      <div class="control"><label for="mp-sh">Shaded substring (manual) <output for="mp-sh"></output></label><input id="mp-sh" type="range" min="0" max="100" step="5" value="100"></div>
+      <div class="control"><label for="mp-speed">Speed <output for="mp-speed"></output></label><input id="mp-speed" type="range" min="5" max="200" step="5" value="40"></div>
+      <div class="row"><button class="act" type="button" id="mp-run">Pause</button><button class="ghost" type="button" id="mp-reset">Restart</button></div>
+      <div class="readouts">
+        <div class="readout"><div class="k">State</div><div class="v" id="mp-state">-</div></div>
+        <div class="readout"><div class="k">Mode</div><div class="v" id="mp-mode">-</div></div>
+        <div class="readout"><div class="k">Switching frequency</div><div class="v" id="mp-fs">-</div></div>
+        <div class="readout"><div class="k">Time</div><div class="v" id="mp-t">-</div></div>
+        <div class="readout big"><div class="k">Tracking efficiency (energy)</div><div class="v" id="mp-trk">-</div></div>
+        <div class="readout"><div class="k">Delivered to battery</div><div class="v" id="mp-e">-</div></div>
+      </div>
+      <p class="note">One tick = 1 ms. The first second is the start-up wait, so tracking efficiency counts from the first sweep. Converter efficiency comes from the flagship loss model, sampled every 50 ms.</p>
+    </div>
+    <div><div id="mp-pchart"></div><div id="mp-vchart"></div></div>
+  </div>
+</div>

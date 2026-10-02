@@ -1,0 +1,33 @@
+<!-- title: 5. Devices: Si vs GaN vs SiC | path: learn/devices.html | nav: learn | script: pages/devices-lesson.js | desc: Why GaN's low output charge, low gate charge and zero reverse recovery cut switching loss, where SiC belongs, and what monolithic bidirectional GaN switches change. -->
+<div class="prose">
+<p class="note">Lesson 5 of 7</p>
+<h1>Devices: silicon, gallium nitride, silicon carbide</h1>
+<p class="lede">Lesson 4 showed which device parameters cost watts: on-resistance (R_ds(on)) for conduction, output charge (Q_oss) and gate charge (Q_g) for switching, and reverse-recovery charge (Q_rr) for hard commutation. The three semiconductor technologies trade these very differently.</p>
+
+<h2>The figures of merit</h2>
+<p>Doubling a die's area halves R_ds(on) but doubles its charges, so a technology is judged by products that are roughly independent of die size: R_ds(on) x Q_g (drive-limited switching) and R_ds(on) x Q_oss (hard-switched capacitance loss). Lower is better. The table below computes them from the datasheet values in <code>data/devices.json</code>.</p>
+</div>
+<div class="tablewrap"><table id="dev-table"><thead><tr><th>Device</th><th>Technology</th><th class="r">V_DS</th><th class="r">R_ds(on) max</th><th class="r">Q_g</th><th class="r">Q_oss</th><th class="r">Q_rr</th><th class="r">R x Q_g</th><th class="r">R x Q_oss (at 50 V)</th><th>Data</th></tr></thead><tbody></tbody></table></div>
+<div class="prose">
+<p class="note">R x Q figures in mOhm x nC. For the 650 V SiC parts Q_oss is scaled from its 400 V value to 50 V with the fitted exponent (estimate). The "Data" column links each datasheet; fields not checked against it are marked estimate in the JSON.</p>
+
+<h2>Why GaN wins at 30-100 V</h2>
+<ul>
+<li><b>No body diode, Q_rr = 0.</b> A silicon MOSFET's body diode stores charge that is swept out at full voltage on every hard turn-on. GaN high-electron-mobility transistors (HEMTs) conduct in reverse through the channel itself, with nothing to recover.</li>
+<li><b>About a fifth of the gate charge</b> at the same R_ds(on), so the drivers are smaller and faster and gate loss is negligible.</li>
+<li><b>Roughly half the output charge</b>, so the hard turn-on loss Q_oss V f halves.</li>
+<li><b>The catch:</b> reverse conduction during dead time drops ~2 V (versus ~0.8 V for a silicon diode). Dead times must therefore be short, a few nanoseconds, and the gate must stay below ~6 V absolute maximum. Dynamic on-resistance and layout parasitics also matter (Jones, Wang &amp; Costinett, IEEE JESTPE 2016).</li>
+</ul>
+
+<h2>Where SiC belongs</h2>
+<p>Silicon carbide's wide bandgap shines at 650-10,000 V, in EV traction, PV strings and grid tie: it blocks huge voltages in a thin drift layer and runs hot. No SiC MOSFET exists near 100 V, and at 30 V a 650 V part pays for voltage it never uses with several times the on-resistance and ten times the gate charge. The <a href="../tools/devices.html">device comparison tool</a> puts all three in the same converter.</p>
+
+<h2>Monolithic bidirectional GaN switches</h2>
+<p>A conventional transistor blocks voltage in one direction only; its body diode or reverse channel conducts the other way. Blocking both ways, as an AC switch, a disconnect or a matrix converter needs, normally takes two transistors back to back, doubling resistance and part count. A monolithic bidirectional switch (BDS) uses one GaN channel with two gates (or a common-drain arrangement) to block both polarities.</p>
+<ul>
+<li>The flagship uses the <b>Innoscience INV100FQ030C</b> (100 V, 3.2 mOhm max) as its input disconnect, blocking reverse polarity and night-time battery back-feed with one channel instead of two, and as the bypass switch.</li>
+<li>MIT's condensed buck-boost (CoBB) puts bidirectional switches <i>inside</i> a flying-capacitor buck-boost and cuts passive weight 2.85x, measuring 95.4 % buck and 97.5 % boost peak at 880 W, 200-500 V to 270 V, gate drive excluded (Aron et al., IEEE TPEL 2025).</li>
+<li>Commercial parts as of the last verification: Infineon CoolGaN BDS at 650 V (TOLT) and 40 V (WLCSP), and Innoscience VGaN at 40 V and 100 V. See <a href="../sources.html">Sources</a>.</li>
+</ul>
+</div>
+<div class="lessonnav"><a href="losses.html">Lesson 4: loss modelling</a><a href="control.html">Lesson 6: control and MPPT</a></div>

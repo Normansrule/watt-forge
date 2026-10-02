@@ -1,0 +1,27 @@
+// control-lesson.js -- interactive PV curve with global and local maxima.
+import * as PV from '../model/pv.js';
+import { lineChart } from '../ui/charts.js';
+import { $, slider, debounce } from '../ui/ui.js';
+
+const panel = PV.defaultPanel();
+const st = { g: 1000, t: 25, s: 1 };
+const run = debounce(() => {
+  const irr = [st.g, st.g, st.g * st.s];
+  const pts = PV.pvCurve(irr, st.t, panel, 260);
+  const curve = pts.map((p) => [p.v, p.p]);
+  const mpp = PV.globalMpp(irr, st.t, panel);
+  const peaks = [];
+  for (let i = 1; i < pts.length - 1; i++) if (pts[i].p > pts[i - 1].p && pts[i].p >= pts[i + 1].p && pts[i].p > 2) peaks.push(pts[i]);
+  const voc = PV.panelVoltage(0, irr, st.t, panel);
+  $('#pv-mpp').textContent = `${mpp.p.toFixed(0)} W at ${mpp.v.toFixed(1)} V`;
+  $('#pv-voc').textContent = voc.toFixed(1) + ' V';
+  $('#pv-n').textContent = String(peaks.length);
+  const marks = peaks.filter((p) => Math.abs(p.v - mpp.v) > 1).map((p) => ({ x: p.v, y: p.p, cls: 'c2', label: 'local' }));
+  marks.push({ x: mpp.v, y: mpp.p, cls: 'c3', label: 'global MPP' });
+  lineChart($('#pv-chart'), { height: 320, title: 'Panel power vs voltage', series: [{ name: 'P', cls: 'c1', pts: curve, endDot: false }],
+    x: { label: 'panel voltage [V]', min: 0, max: Math.max(52, voc + 1) }, y: { label: 'power [W]', min: 0, max: 450 }, marks,
+    tipFmt: (y) => y.toFixed(1) + ' W' });
+}, 15);
+slider('pv-g', (v) => v + ' W/m^2', (v) => { st.g = v; run(); });
+slider('pv-t', (v) => v + ' C', (v) => { st.t = v; run(); });
+slider('pv-s', (v) => v + ' %', (v) => { st.s = v / 100; run(); });

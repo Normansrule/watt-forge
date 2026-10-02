@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+build/
+dist/
+*.egg-info/
+node_modules/
+target/
+desktop/src-tauri/gen/
+.ipynb_checkpoints/
+.DS_Store
+*.zip

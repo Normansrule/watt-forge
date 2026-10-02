@@ -1,0 +1,37 @@
+<!-- title: Efficiency-curve validator | path: tools/validator.html | nav: tools | script: pages/validator.js | desc: Define a target efficiency curve and check a design against it; the validator flags every load where the design falls short and names the loss term responsible. -->
+<h1>Efficiency-curve validator</h1>
+<p class="lede">Write down the efficiency your application needs at each load, as a table or as a formula. The validator sweeps the design across load, marks every point that misses, and tells you which loss term to attack there.</p>
+<div class="bench">
+  <div class="bench-grid">
+    <div class="controls">
+      <div class="control"><label for="va-src">Design under test</label>
+        <select id="va-src">
+          <option value="flagship">Flagship hybrid GaN buck-boost (choose Vin below)</option>
+          <option value="saved">A design saved in the topology designer</option>
+        </select></div>
+      <div class="control" id="va-vin-row"><label for="va-vin">Flagship panel voltage <output for="va-vin"></output></label><input id="va-vin" type="range" min="12" max="60" step="1" value="36"></div>
+      <div class="control" id="va-saved-row" hidden><label for="va-saved">Saved design</label><select id="va-saved"></select></div>
+      <div class="control"><label for="va-mode">Target defined by</label><select id="va-mode"><option value="table">Table of points</option><option value="formula">Formula in p (load fraction 0-1)</option></select></div>
+      <div class="control" id="va-table-row"><label for="va-table">Load %, minimum efficiency % (one pair per line)</label>
+        <textarea id="va-table" rows="7">10, 97.0
+20, 98.0
+30, 98.5
+50, 98.8
+75, 99.0
+100, 99.0</textarea></div>
+      <div class="control" id="va-formula-row" hidden><label for="va-formula">Minimum efficiency (fraction) as a function of p</label><input id="va-formula" type="text" value="0.991 - 0.02*(1-p)^4" maxlength="200" spellcheck="false">
+        <p class="note">Allowed: numbers, p, + - * / ^, parentheses, sqrt abs exp ln log10 min max pow clamp, pi, e. Evaluated by a small parser, never by eval.</p></div>
+      <p class="err" id="va-err" role="alert"></p>
+    </div>
+    <div>
+      <div class="readouts">
+        <div class="readout big"><div class="k">Verdict</div><div class="v" id="va-verdict">-</div></div>
+        <div class="readout"><div class="k">Worst shortfall</div><div class="v" id="va-worst">-</div></div>
+        <div class="readout"><div class="k">CEC-weighted (design)</div><div class="v" id="va-cec">-</div></div>
+        <div class="readout"><div class="k">Euro-weighted (design)</div><div class="v" id="va-euro">-</div></div>
+      </div>
+      <div id="va-chart"></div>
+      <div class="tablewrap"><table id="va-tab"><thead><tr><th class="r">Load</th><th class="r">Design</th><th class="r">Target</th><th class="r">Margin</th><th>Biggest loss there, and what to try</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</div>

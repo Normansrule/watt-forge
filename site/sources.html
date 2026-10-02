@@ -1,0 +1,25 @@
+<!-- title: Sources | path: sources.html | nav: sources | script: pages/sources.js | desc: Every paper, datasheet and tool cited by Watt Forge, with DOIs, exact test conditions and verification status. -->
+<div class="prose">
+<h1>Sources</h1>
+<p class="lede">Every efficiency figure on this site is cited here with the exact conditions it was measured under and what it includes. Where a commonly quoted number could not be verified, this page says so rather than repeating it.</p>
+<p class="note" id="src-verified"></p>
+<h2>Corrections to commonly quoted numbers</h2>
+<ul>
+<li>The MDPI <i>Sustainability</i> 2024 hybrid switched-capacitor buck-boost paper's 96 % and 99.2 % are photovoltaic energy-harvest ratios, not converter efficiency.</li>
+<li>A "96-97 % switched-capacitor buck-boost for PV" could not be verified. The closest verified paper (Liang et al., APEC 2012) reports 92.5 %.</li>
+<li>The CoBB bidirectional-GaN buck-boost results are from MIT and exclude gate-drive loss.</li>
+<li>The TI GaN optimizer's 99.5-99.6 % is a pass-through state; its switching peak is 99.0 %.</li>
+<li>The piezoelectric "&gt;99 %" figure (Boles et al. 2021) appears to be calculated rather than measured.</li>
+</ul>
+</div>
+<div id="src-list"></div>
+<div class="prose">
+<h2>Component data</h2>
+<p>Device parameters: <code>data/devices.json</code>, with each field marked as checked against the datasheet or estimated. Flagship bill of materials: <code>hardware/flagship/BOM.csv</code> (status column per line).</p>
+<h2>Open-source tools</h2>
+<table><thead><tr><th>Tool</th><th>Use here</th></tr></thead><tbody>
+<tr><td><a href="https://ngspice.sourceforge.io" rel="noopener noreferrer">ngspice</a></td><td>Desktop simulation back end and the cross-check of the Python circuit simulation (run as an external program, not bundled).</td></tr>
+<tr><td><a href="https://gitlab.com/kicad/code/kicad" rel="noopener noreferrer">KiCad</a></td><td>Schematic and BOM conventions for the reference design (conventions only).</td></tr>
+<tr><td>Apache ECharts, plotly.js</td><td>Considered for charts. The site ships its own small SVG charts so it can run under a strict Content Security Policy with no third-party scripts.</td></tr>
+</tbody></table>
+</div>

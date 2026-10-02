@@ -1,0 +1,18 @@
+<!-- title: 7. The frontier | path: learn/frontier.html | nav: learn | script: pages/frontier.js | desc: Research topology library from kilovolts to phone-level: hybrid switched-capacitor, flying-capacitor multilevel and piezoelectric-resonator converters, with verified records and their exact conditions. -->
+<div class="prose">
+<p class="note">Lesson 7 of 7</p>
+<h1>The frontier</h1>
+<p class="lede">Where converter research is heading, from medium-voltage DC transformers down to phone-level rails. Every number below comes with its exact test conditions and a verification status. A headline efficiency without its conditions is marketing, not engineering.</p>
+<p class="note" id="fr-verified"></p>
+</div>
+<figure class="figure"><img src="../img/topology_map.png" alt="Topology map: verified demonstrations plotted by the voltage span they cover and their power, from a 7 kV to 400 V SiC DC transformer at 25 kW down to a 48 V to 4.8 V hybrid piezoelectric converter at 0.72 W" width="1390" height="790"><figcaption>Each bar spans the output to input voltage of a verified demonstration at its power level. The flagship's bar is a model prediction.</figcaption></figure>
+<div class="prose">
+<h2>High-ratio hybrid switched-capacitor converters</h2>
+<p>Data-centre 48 V buses must reach a processor's 1 V. A plain buck at D = 0.02 has tiny on-times and huge switching loss, so hybrid converters let capacitors do most of the division and keep inductors small. Das &amp; Le's dual-phase multi-inductor hybrid reached 90.9 % at 48 V to 1 V, 30 A, <i>including</i> gate drive.</p>
+<h2>Flying-capacitor multilevel converters</h2>
+<p>Stack more flying capacitors and each switch blocks Vbus/(N-1), while the inductor sees steps at (N-1) times the switching frequency. The flagship is the N = 3 case. The same idea scales up: a 50 kW three-level buck-boost with a planar coupled inductor (Cao et al., TPEL 2023) and MIT's condensed buck-boost with bidirectional GaN switches.</p>
+<h2>Piezoelectric-resonator converters: no magnetics at all</h2>
+<p>A piezoelectric resonator stores energy mechanically, in an acoustic vibration of a ceramic disc, instead of in a magnetic field. Switch it at the right moments in its cycle and it can replace the inductor entirely, with potentially far higher power density. Results so far are research-stage:</p>
+</div>
+<div id="fr-cards"></div>
+<div class="lessonnav"><a href="control.html">Lesson 6: control and MPPT</a><a href="../flagship.html">The flagship design</a></div>

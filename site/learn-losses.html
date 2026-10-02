@@ -1,0 +1,65 @@
+<!-- title: 4. Loss modelling | path: learn/losses.html | nav: learn | script: pages/losses-lesson.js | desc: Every converter loss term: conduction, switching overlap, output capacitance, reverse recovery, gate drive, dead time, Steinmetz core loss, and how ZVS removes terms. -->
+<div class="prose">
+<p class="note">Lesson 4 of 7</p>
+<h1>Loss modelling</h1>
+<p class="lede">An ideal converter is 100 % efficient, so every watt lost has a name. This lesson takes each term in turn: the intuition, the equation, the symbols and units, a worked example the test suite checks, and its place in a live loss budget at the end.</p>
+<div class="eqbox"><span class="eq">eta = P_out / (P_out + sum P_loss)</span></div>
+
+<h2>Conduction: I^2 R in switches, inductor DCR and capacitor ESR</h2>
+<p><b>Intuition.</b> Anything with resistance carrying current heats up, and it heats up with the square of the RMS current, not the average. Ripple therefore costs extra. A switch carrying a trapezoidal current for part of the period has an RMS that includes the ripple's contribution.</p>
+<div class="eqbox"><span class="eq">P = I_rms^2 * R&nbsp;&nbsp;&nbsp;&nbsp;I_rms^2 = D * (I^2 + dI^2/12)</span></div>
+<dl class="symbols"><dt>R</dt><dd>R_ds(on) of a switch, DCR of an inductor, ESR of a capacitor [ohm]; R_ds(on) rises with temperature; this repo estimates about +50 % at 100 C for GaN and more for silicon (check the datasheet curve)</dd><dt>dI</dt><dd>peak-to-peak ripple [A]</dd></dl>
+<div class="worked"><b>Worked example.</b> 10 A through 5 mOhm: 0.5 W. A switch carrying 10 A at D = 0.25 with 3 A of ripple has I_rms^2 = 0.25 x (100 + 9/12) = 25.19 A^2. <span class="testref">tests/test_losses.py::test_conduction_worked_example</span></div>
+
+<h2>Switching: turn-on/turn-off overlap</h2>
+<p><b>Intuition.</b> A transistor cannot switch in zero time. While its voltage falls and its current rises, both are non-zero at once, and that product is dissipated. The overlap time is set by how fast the gate driver can push the Miller charge Q_gd through the gate resistance.</p>
+<div class="eqbox"><span class="eq">P_ov ~ 1/2 * V * I * (t_on + t_off) * f&nbsp;&nbsp;&nbsp;&nbsp;t ~ (Q_gs2 + Q_gd) / I_g,&nbsp;&nbsp;I_g = (V_drv - V_pl)/R_g</span></div>
+<div class="worked"><b>Worked example.</b> 48 V, 10 A, 10 ns + 10 ns, 200 kHz: 1/2 x 48 x 10 x 20 ns x 200 kHz = 0.96 W. <span class="testref">tests/test_losses.py::test_switching_worked_examples</span></div>
+
+<h2>Switching: output capacitance (Coss)</h2>
+<p><b>Intuition.</b> Every transistor is also a capacitor between drain and source. When a switch turns on hard (against voltage), its own stored charge is dumped into its channel. In a half-bridge it also charges the opposite switch's capacitance from the bus through its channel, and that dissipates as much again. Because Coss is strongly nonlinear, use the datasheet's charge Q_oss, not a single capacitance.</p>
+<div class="eqbox"><span class="eq">single device: P = 1/2 * C_oss * V^2 * f&nbsp;&nbsp;&nbsp;&nbsp;half-bridge hard turn-on: P = Q_oss(V) * V * f</span></div>
+<dl class="symbols"><dt>Q_oss(V)</dt><dd>output charge at V; modelled as Q_ref (V/V_ref)^m with m fitted from the datasheet's energy- and time-related capacitances: E/(QV) = m/(m+1) [C]</dd></dl>
+<div class="worked"><b>Worked example.</b> A linear 1 nF at 48 V and 200 kHz: 0.2304 W for one device, 0.4608 W for the half-bridge transition. For the EPC2361 the fit m = 0.653 reproduces the datasheet's 1419 pF / 1796 pF to 1 %. <span class="testref">tests/test_losses.py::test_qoss_exponent_fit_reproduces_datasheet</span></div>
+
+<h2>Zero-voltage and zero-current switching (ZVS, ZCS)</h2>
+<p><b>Intuition.</b> If the inductor current is flowing the right way at the switching instant, it charges and discharges the two output capacitances during the dead time. The incoming switch then turns on with zero volts across it, and the Coss term and the turn-on overlap vanish. In a synchronous buck the rectifier always gets ZVS. The main switch gets it only when the ripple takes the current negative, which is exactly what happens at light load in the flagship. Zero-current switching (ZCS) removes the turn-off overlap the same way, by letting current reach zero first.</p>
+<div class="eqbox"><span class="eq">full ZVS when |i| * t_dead &gt;= 2 * Q_oss(V);&nbsp;&nbsp;residual fraction r = max(0, 1 - |i| t_dead / (2 Q_oss)),&nbsp;&nbsp;P ~ Q_oss V r^2 f</span></div>
+<div class="worked"><b>Worked example.</b> 12 A for 10 ns delivers 120 nC = 2 x 60 nC: full ZVS. 6 A only gets halfway. <span class="testref">tests/test_losses.py::test_zvs_residual</span></div>
+
+<h2>Reverse recovery</h2>
+<p><b>Intuition.</b> A silicon body diode that was conducting stores minority carriers. When the opposite switch turns on, those carriers must be swept out as a reverse current spike at full voltage. GaN transistors have no body diode, so Q_rr = 0, the single largest reason GaN wins at these voltages.</p>
+<div class="eqbox"><span class="eq">P_rr ~ Q_rr * V * f</span></div>
+<div class="worked"><b>Worked example.</b> Silicon ISC030N10NM6 (Q_rr 56 nC at its datasheet conditions) at 48 V and 100 kHz: 0.269 W. GaN EPC2361: zero. <span class="testref">tests/test_losses.py::test_switching_worked_examples</span></div>
+
+<h2>Gate drive and dead time</h2>
+<div class="eqbox"><span class="eq">P_gate = Q_g * V_drv * f&nbsp;&nbsp;&nbsp;&nbsp;P_dead = V_sd * |I| * t_dead * f * n</span></div>
+<p><b>Intuition.</b> Each turn-on charges the gate and each turn-off dumps that charge, so Q_g x V_drv is lost per cycle. During the dead time, when both switches are off to avoid shoot-through, the current flows through a diode-like path. For GaN that path is reverse conduction at V_sd ~ 2 V, a much larger drop than a silicon diode's, so GaN dead times are kept to a few nanoseconds.</p>
+<div class="worked"><b>Worked example.</b> 28 nC x 5 V x 100 kHz = 14 mW per switch. 2 V x 10 A x 10 ns x 2 edges x 100 kHz = 40 mW. <span class="testref">tests/test_losses.py::test_switching_worked_examples</span></div>
+
+<h2>Inductor core loss: Steinmetz and iGSE</h2>
+<p><b>Intuition.</b> A magnetic core loses energy every time its flux swings: hysteresis plus eddy currents. Steinmetz measured that the loss density grows as a power of frequency and flux swing. Converter flux is triangular, not sinusoidal, and the improved Generalized Steinmetz Equation (iGSE) handles any waveform using the same three coefficients.</p>
+<div class="eqbox"><span class="eq">Steinmetz: P_v = k f^alpha B_pk^beta&nbsp;&nbsp;&nbsp;&nbsp;iGSE: P_v = (1/T) * integral k_i |dB/dt|^alpha (dB)^(beta-alpha) dt</span></div>
+<dl class="symbols"><dt>P_v</dt><dd>loss per unit core volume [W/m^3]</dd><dt>k, alpha, beta</dt><dd>material coefficients (alpha ~ 1.1-1.9, beta ~ 2-3)</dd><dt>dB</dt><dd>peak-to-peak flux swing [T]</dd></dl>
+<div class="worked"><b>Check.</b> The iGSE of a sinusoid reproduces the Steinmetz equation to 0.2 %, and the closed triangular form equals the piecewise evaluation. The material coefficients here are generic and illustrative; real designs use the maker's data. <span class="testref">tests/test_losses.py::test_steinmetz_and_igse</span></div>
+
+<h2>Weighted efficiency for solar</h2>
+<p>A solar converter spends most of its life at part load, so a single peak number flatters it. The California Energy Commission (CEC) and European weightings average the efficiency at several loads, weighted by how often a site sees them.</p>
+<div class="eqbox"><span class="eq">CEC = 0.04 n10 + 0.05 n20 + 0.12 n30 + 0.21 n50 + 0.53 n75 + 0.05 n100<br>Euro = 0.03 n5 + 0.06 n10 + 0.13 n20 + 0.10 n30 + 0.48 n50 + 0.20 n100</span></div>
+</div>
+
+<h2>Put it together: a synchronous buck's loss budget</h2>
+<div class="bench">
+  <div class="bench-grid">
+    <div class="controls">
+      <div class="control"><label for="lb-dev">Transistor</label><select id="lb-dev"></select></div>
+      <div class="control"><label for="lb-f">Switching frequency <output for="lb-f"></output></label><input id="lb-f" type="range" min="50" max="1000" step="25" value="300"></div>
+      <div class="control"><label for="lb-p">Output power (48 V to 12 V) <output for="lb-p"></output></label><input id="lb-p" type="range" min="10" max="300" step="10" value="120"></div>
+      <div class="control"><label for="lb-rip">Ripple, fraction of load current <output for="lb-rip"></output></label><input id="lb-rip" type="range" min="0.1" max="3" step="0.1" value="0.3"></div>
+      <div class="readouts"><div class="readout big"><div class="k">Efficiency</div><div class="v" id="lb-eta">-</div></div></div>
+      <p class="note">Push the ripple above 2x the load current: the valley goes negative, ZVS kicks in, and the Coss term disappears.</p>
+    </div>
+    <div><div id="lb-donut"></div><div id="lb-bars" class="bars"></div></div>
+  </div>
+</div>
+<div class="lessonnav"><a href="switched-capacitor.html">Lesson 3: switched-capacitor and hybrid</a><a href="devices.html">Lesson 5: devices</a></div>

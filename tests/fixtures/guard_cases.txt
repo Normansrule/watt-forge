@@ -1,0 +1,100 @@
+# Shared netlist-guard cases, checked by Python (tests/test_hdl_pv_spice.py), JavaScript
+# (tests/js/guard.mjs) and Rust (desktop/netlist-guard). Format: a line "=== ok <name>" or
+# "=== reject <name>" starts a case; the netlist follows until the next "===" line.
+=== ok plain-rc
+* good
+V1 in 0 DC 12
+R1 in out 1k
+C1 out 0 1u
+.tran 1u 1m
+.meas tran vavg AVG v(out)
+.end
+=== ok title-line-is-not-parsed
+* shell write load: words in the title line are ignored, like SPICE does
+V1 in 0 DC 1
+R1 in 0 1
+.op
+.end
+=== ok comments-may-mention-anything
+* t
+* .control shell rm -rf ~  (a comment, never executed)
+V1 in 0 DC 1
+R1 in 0 1
+.op
+.end
+=== ok behavioural-source-and-bjt
+* t
+V1 in 0 DC 1
+B1 out 0 V=v(in)*2
+Q1 c b 0 QMOD
+.model QMOD NPN
+.save all
+.op
+.end
+=== ok meg-suffix-tran
+* t
+V1 in 0 PULSE(0 1 0 1n 1n 5u 10u)
+R1 in 0 1meg
+.tran 100n 1m
+.end
+=== reject control-block-shell
+* t
+V1 in 0 DC 1
+.control
+shell rm -rf ~
+.endc
+.end
+=== reject control-uppercase
+* t
+V1 in 0 DC 1
+.CONTROL
+run
+.ENDC
+.end
+=== reject include
+* t
+.include /etc/passwd
+.end
+=== reject lib
+* t
+.lib /tmp/x.lib tt
+.end
+=== reject exec
+* t
+.exec shell ls
+.end
+=== reject too-many-points
+* t
+V1 in 0 DC 1
+.tran 1p 10
+.end
+=== reject too-many-points-uppercase
+* t
+V1 in 0 DC 1
+.TRAN 1n 10
+.end
+=== reject unknown-element
+* t
+Z1 in out 1k
+.end
+=== reject xspice-code-model
+* t
+A1 in out filt
+.end
+=== reject option-continuation-shell
+* t
+.option
++ shell=1
+.end
+=== reject write-in-param
+* t
+.param x = write
+.end
+=== reject unknown-dot
+* t
+.measure_and_run x
+.end
+=== reject malformed-tran
+* t
+.tran fast
+.end

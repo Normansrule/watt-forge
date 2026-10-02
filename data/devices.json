@@ -1,0 +1,123 @@
+{
+  "_about": "Device parameters for the Watt Forge loss models. Values marked in 'verified' were read from the manufacturer datasheet or product page on 2026-09-30 (see docs/REFERENCES.md, section D). Everything else is an ESTIMATE, explained in 'notes'. Check the datasheet before trusting any number for a real build.",
+  "_units": {
+    "vds": "V", "rds_typ_mohm": "mOhm at 25 C", "rds_max_mohm": "mOhm at 25 C",
+    "rds_tc": "fractional increase per kelvin above 25 C (estimate from typical datasheet curves)",
+    "qg_nc": "nC at the listed drive voltage", "qgd_nc": "nC", "qoss_nc": "nC at qoss_v",
+    "qoss_v": "V", "qoss_exp": "m in Qoss(V) = Qoss_ref*(V/Vref)^m", "qrr_nc": "nC",
+    "vsd": "V reverse-conduction (third-quadrant) drop during dead time",
+    "vdrv": "V gate drive", "vpl": "V Miller plateau (estimate)", "rg_ohm": "total gate loop resistance (estimate)"
+  },
+  "devices": [
+    {
+      "id": "EPC2361", "maker": "EPC", "tech": "GaN", "vds": 100,
+      "rds_typ_mohm": 0.75, "rds_max_mohm": 1.0, "rds_tc": 0.0065,
+      "qg_nc": 28, "qgd_nc": 3.8, "qoss_nc": 90, "qoss_v": 50, "coss_er_pf": 1419, "coss_tr_pf": 1796,
+      "qoss_exp": 0.653, "qrr_nc": 0, "vsd": 2.0, "vdrv": 5, "vpl": 2.6, "rg_ohm": 1.6,
+      "id_a": 133, "package": "3x5 mm QFN",
+      "url": "https://epc-co.com/epc/Portals/0/epc/documents/datasheets/EPC2361_datasheet.pdf",
+      "verified": ["vds", "rds_typ_mohm", "rds_max_mohm", "qg_nc", "qgd_nc", "qoss_nc", "coss_er_pf", "coss_tr_pf", "qrr_nc", "id_a", "package"],
+      "notes": "qoss_exp fitted from Co(er)/Co(tr): E/(Q*V) = m/(m+1)."
+    },
+    {
+      "id": "EPC2302", "maker": "EPC", "tech": "GaN", "vds": 100,
+      "rds_typ_mohm": 1.4, "rds_max_mohm": 1.8, "rds_tc": 0.0065,
+      "qg_nc": 23, "qgd_nc": 2.3, "qoss_nc": 85, "qoss_v": 50, "coss_er_pf": 1300, "coss_tr_pf": 1700,
+      "qoss_exp": 0.619, "qrr_nc": 0, "vsd": 2.0, "vdrv": 5, "vpl": 2.6, "rg_ohm": 1.6,
+      "id_a": 133, "package": "3x5 mm QFN",
+      "url": "https://epc-co.com/epc/Portals/0/epc/documents/datasheets/EPC2302_datasheet.pdf",
+      "verified": ["vds", "rds_typ_mohm", "rds_max_mohm", "qg_nc", "qgd_nc", "qoss_nc", "coss_er_pf", "coss_tr_pf", "qrr_nc", "id_a", "package"],
+      "notes": "qoss_exp fitted from Co(er)/Co(tr)."
+    },
+    {
+      "id": "EPC2071", "maker": "EPC", "tech": "GaN", "vds": 100,
+      "rds_typ_mohm": 1.7, "rds_max_mohm": 2.2, "rds_tc": 0.0065,
+      "qg_nc": 18, "qgd_nc": 1.8, "qoss_nc": 71, "qoss_v": 50, "coss_er_pf": 1058, "coss_tr_pf": 1422,
+      "qoss_exp": 0.592, "qrr_nc": 0, "vsd": 2.0, "vdrv": 5, "vpl": 2.6, "rg_ohm": 1.6,
+      "id_a": 64, "package": "bare die 4.45x2.3 mm",
+      "url": "https://epc-co.com/epc/Portals/0/epc/documents/datasheets/EPC2071_datasheet.pdf",
+      "verified": ["vds", "rds_typ_mohm", "rds_max_mohm", "qg_nc", "qgd_nc", "qoss_nc", "coss_er_pf", "coss_tr_pf", "qrr_nc", "id_a", "package"],
+      "notes": "qoss_exp fitted from Co(er)/Co(tr)."
+    },
+    {
+      "id": "EPC2088", "maker": "EPC", "tech": "GaN", "vds": 100,
+      "rds_typ_mohm": 2.4, "rds_max_mohm": 3.2, "rds_tc": 0.0065,
+      "qg_nc": 17.8, "qgd_nc": 1.4, "qoss_nc": 47, "qoss_v": 50, "coss_er_pf": null, "coss_tr_pf": null,
+      "qoss_exp": 0.65, "qrr_nc": 0, "vsd": 2.0, "vdrv": 5, "vpl": 2.6, "rg_ohm": 1.6,
+      "id_a": 60, "package": "bare die 3.5x1.95 mm",
+      "url": "https://epc-co.com/epc/Portals/0/epc/documents/datasheets/EPC2088_datasheet.pdf",
+      "verified": ["vds", "rds_typ_mohm", "rds_max_mohm", "qg_nc", "qgd_nc", "qoss_nc", "qrr_nc", "id_a", "package"],
+      "notes": "EPC's recommended replacement for EPC2218. qoss_exp assumed equal to the EPC2218 fit."
+    },
+    {
+      "id": "EPC2218", "maker": "EPC", "tech": "GaN", "vds": 100,
+      "rds_typ_mohm": 2.4, "rds_max_mohm": 3.2, "rds_tc": 0.0065,
+      "qg_nc": 10.5, "qgd_nc": 1.5, "qoss_nc": 46, "qoss_v": 50, "coss_er_pf": 740, "coss_tr_pf": 925,
+      "qoss_exp": 0.667, "qrr_nc": 0, "vsd": 2.0, "vdrv": 5, "vpl": 2.6, "rg_ohm": 1.6,
+      "id_a": 60, "package": "bare die 3.5x1.95 mm",
+      "url": "https://epc-co.com/epc/Portals/0/epc/documents/datasheets/EPC2218_datasheet.pdf",
+      "verified": ["vds", "rds_typ_mohm", "rds_max_mohm", "qg_nc", "qgd_nc", "qoss_nc", "coss_er_pf", "coss_tr_pf", "qrr_nc", "id_a", "package"],
+      "notes": "Active, but EPC recommends EPC2088 for new designs."
+    },
+    {
+      "id": "EPC2619", "maker": "EPC", "tech": "GaN", "vds": 100,
+      "rds_typ_mohm": 3.3, "rds_max_mohm": 4.2, "rds_tc": 0.0065,
+      "qg_nc": 8.5, "qgd_nc": 1.0, "qoss_nc": 27, "qoss_v": 50, "coss_er_pf": null, "coss_tr_pf": null,
+      "qoss_exp": 0.65, "qrr_nc": 0, "vsd": 2.0, "vdrv": 5, "vpl": 2.6, "rg_ohm": 1.6,
+      "id_a": 29, "package": "bare die 2.5x1.5 mm",
+      "url": "https://epc-co.com/epc/Portals/0/epc/documents/datasheets/EPC2619_datasheet.pdf",
+      "verified": ["vds", "rds_typ_mohm", "rds_max_mohm", "qg_nc", "qgd_nc", "qoss_nc", "qrr_nc", "id_a", "package"],
+      "notes": "qoss_exp assumed."
+    },
+    {
+      "id": "ISC030N10NM6", "maker": "Infineon", "tech": "Si", "vds": 100,
+      "rds_typ_mohm": 2.6, "rds_max_mohm": 3.0, "rds_tc": 0.009,
+      "qg_nc": 55, "qgd_nc": 9.1, "qoss_nc": 101, "qoss_v": 50, "coss_er_pf": null, "coss_tr_pf": null,
+      "qoss_exp": 0.5, "qrr_nc": 56, "vsd": 0.85, "vdrv": 10, "vpl": 4.8, "rg_ohm": 3.2,
+      "id_a": 179, "package": "SuperSO8 5x6 mm",
+      "url": "https://www.infineon.com/assets/row/public/documents/24/49/infineon-isc030n10nm6-datasheet-en.pdf",
+      "verified": ["vds", "rds_typ_mohm", "rds_max_mohm", "qg_nc", "qgd_nc", "qoss_nc", "qrr_nc", "id_a", "package"],
+      "notes": "Qrr 56 nC is at 50 V, 25 A, 100 A/us; real Qrr grows with di/dt and temperature. qoss_exp, vsd, vpl are estimates."
+    },
+    {
+      "id": "CSD19536KTT", "maker": "TI", "tech": "Si", "vds": 100,
+      "rds_typ_mohm": 2.0, "rds_max_mohm": 2.4, "rds_tc": 0.009,
+      "qg_nc": 118, "qgd_nc": 17, "qoss_nc": 335, "qoss_v": 50, "coss_er_pf": null, "coss_tr_pf": null,
+      "qoss_exp": 0.5, "qrr_nc": 548, "vsd": 0.85, "vdrv": 10, "vpl": 4.5, "rg_ohm": 3.5,
+      "id_a": 272, "package": "D2PAK",
+      "url": "https://www.ti.com/lit/gpn/CSD19536KTT",
+      "verified": ["vds", "rds_typ_mohm", "rds_max_mohm", "qg_nc", "qgd_nc", "qoss_nc", "qrr_nc", "id_a", "package"],
+      "notes": "Qrr 548 nC at 50 V, 100 A, 300 A/us."
+    },
+    {
+      "id": "C3M0015065K", "maker": "Wolfspeed", "tech": "SiC", "vds": 650,
+      "rds_typ_mohm": 15, "rds_max_mohm": 21, "rds_tc": 0.004,
+      "qg_nc": 188, "qgd_nc": 55, "qoss_nc": 213, "qoss_v": 400, "coss_er_pf": null, "coss_tr_pf": null,
+      "qoss_exp": 0.515, "qrr_nc": 432, "vsd": 4.0, "vdrv": 15, "vpl": 8.0, "rg_ohm": 5.0,
+      "id_a": 120, "package": "TO-247-4",
+      "url": "https://assets.wolfspeed.com/uploads/2024/01/Wolfspeed_C3M0015065K_data_sheet.pdf",
+      "verified": ["vds", "rds_typ_mohm", "rds_max_mohm", "qg_nc", "qgd_nc", "id_a", "package"],
+      "notes": "Datasheet gives Eoss 29 uJ at 400 V; qoss_nc derived from Eoss with the exponent fitted on IMT65R010M2H. Qrr 432 nC is at 400 V and 175 C, so it overstates recovery at 30-60 V. There is no SiC MOSFET near 100 V; this part is here to show why."
+    },
+    {
+      "id": "IMT65R010M2H", "maker": "Infineon", "tech": "SiC", "vds": 650,
+      "rds_typ_mohm": 10.0, "rds_max_mohm": 13.1, "rds_tc": 0.004,
+      "qg_nc": 113, "qgd_nc": 21, "qoss_nc": 212, "qoss_v": 400, "coss_er_pf": null, "coss_tr_pf": null,
+      "qoss_exp": 0.515, "qrr_nc": 224, "vsd": 4.0, "vdrv": 18, "vpl": 8.0, "rg_ohm": 5.0,
+      "id_a": 168, "package": "PG-HSOF-8 (TOLL)",
+      "url": "https://www.infineon.com/assets/row/public/documents/24/49/infineon-imt65r010m2h-datasheet-en.pdf",
+      "verified": ["vds", "rds_typ_mohm", "rds_max_mohm", "qg_nc", "qgd_nc", "qoss_nc", "id_a", "package"],
+      "notes": "qoss_exp fitted from Eoss 28.8 uJ and Qoss 212 nC at 400 V. The datasheet's 224 nC recovery charge includes Qoss, so using it double-counts; kept as an upper bound."
+    },
+    {
+      "id": "INV100FQ030C", "maker": "Innoscience", "tech": "GaN-BDS", "vds": 100,
+      "rds_typ_mohm": 2.5, "rds_max_mohm": 3.2, "rds_tc": 0.0065,
+      "qg_nc": 66, "qgd_nc": null, "qoss_nc": 62, "qoss_v": 50, "coss_er_pf": null, "coss_tr_pf": null,
+      "qoss_exp": 0.65, "qrr_nc": 0, "vsd": null, "vdrv": 5, "vpl": null, "rg_ohm": null,
+      "id_a": 100, "package": "FCQFN 4x6 mm",
+      "url": "https://www.innoscience.com/product/detail/11/549",
+      "verified": ["vds", "rds_typ_mohm", "rds_max_mohm", "qg_nc", "qoss_nc", "id_a", "package"],
+      "notes": "Monolithic bidirectional GaN switch. Used only as a static (non-switching) disconnect and bypass switch. Values from the product page; confirm gate structure (single vs dual gate) in the datasheet before layout."
+    }
+  ]
+}

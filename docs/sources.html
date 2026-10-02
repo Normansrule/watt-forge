@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; worker-src 'self'">
+<meta name="referrer" content="no-referrer">
+<title>Sources - Watt Forge</title>
+<meta name="description" content="Every paper, datasheet and tool cited by Watt Forge, with DOIs, exact test conditions and verification status.">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/site.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta name="theme-color" content="#1d6b4f">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar"><div class="inner">
+<a class="brand" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#1d6b4f"/><path d="M6 21 h5 v-10 h5 v10 h5 v-10 h5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>Watt Forge</a>
+<nav class="nav" aria-label="Main"><a href="learn/fundamentals.html">Learn</a><a href="tools/designer.html">Tools</a><a href="flagship.html">Flagship design</a><a href="sources.html" aria-current="page">Sources</a></nav>
+<button class="theme-btn" type="button">Dark theme</button>
+</div></header>
+<div class="safety" role="note"><div class="inner">Design and simulation reference only. Solar and battery hardware is dangerous: high voltage, stored energy, fire risk. Any physical build is at your own risk and needs proper lab safety practice. <a href="safety.html">Read the safety note</a>.</div></div>
+<main id="main">
+<div class="prose">
+<h1>Sources</h1>
+<p class="lede">Every efficiency figure on this site is cited here with the exact conditions it was measured under and what it includes. Where a commonly quoted number could not be verified, this page says so rather than repeating it.</p>
+<p class="note" id="src-verified"></p>
+<h2>Corrections to commonly quoted numbers</h2>
+<ul>
+<li>The MDPI <i>Sustainability</i> 2024 hybrid switched-capacitor buck-boost paper's 96 % and 99.2 % are photovoltaic energy-harvest ratios, not converter efficiency.</li>
+<li>A "96-97 % switched-capacitor buck-boost for PV" could not be verified. The closest verified paper (Liang et al., APEC 2012) reports 92.5 %.</li>
+<li>The CoBB bidirectional-GaN buck-boost results are from MIT and exclude gate-drive loss.</li>
+<li>The TI GaN optimizer's 99.5-99.6 % is a pass-through state; its switching peak is 99.0 %.</li>
+<li>The piezoelectric "&gt;99 %" figure (Boles et al. 2021) appears to be calculated rather than measured.</li>
+</ul>
+</div>
+<div id="src-list"></div>
+<div class="prose">
+<h2>Component data</h2>
+<p>Device parameters: <code>data/devices.json</code>, with each field marked as checked against the datasheet or estimated. Flagship bill of materials: <code>hardware/flagship/BOM.csv</code> (status column per line).</p>
+<h2>Open-source tools</h2>
+<table><thead><tr><th>Tool</th><th>Use here</th></tr></thead><tbody>
+<tr><td><a href="https://ngspice.sourceforge.io" rel="noopener noreferrer">ngspice</a></td><td>Desktop simulation back end and the cross-check of the Python circuit simulation (run as an external program, not bundled).</td></tr>
+<tr><td><a href="https://gitlab.com/kicad/code/kicad" rel="noopener noreferrer">KiCad</a></td><td>Schematic and BOM conventions for the reference design (conventions only).</td></tr>
+<tr><td>Apache ECharts, plotly.js</td><td>Considered for charts. The site ships its own small SVG charts so it can run under a strict Content Security Policy with no third-party scripts.</td></tr>
+</tbody></table>
+</div>
+</main>
+<footer><div class="inner">Watt Forge: open-source converter design, MIT licensed. Runs entirely in your browser: no accounts, no analytics, designs stay in this browser's storage. Every efficiency figure on this site is cited with its test conditions on the <a href="sources.html">Sources</a> page. Models are predictions, not measurements.</div></footer>
+<script type="module" src="js/ui/ui.js"></script>
+<script type="module" src="js/pages/sources.js"></script>
+</body>
+</html>

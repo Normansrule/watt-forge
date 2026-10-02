@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; worker-src 'self'">
+<meta name="referrer" content="no-referrer">
+<title>SPICE runner - Watt Forge</title>
+<meta name="description" content="Inspect and run SPICE netlists for the worked examples and the flagship power stage. The web version shows stored ngspice results; the desktop app runs ngspice live in a sandbox.">
+<link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../css/site.css">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+<meta name="theme-color" content="#1d6b4f">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar"><div class="inner">
+<a class="brand" href="../index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#1d6b4f"/><path d="M6 21 h5 v-10 h5 v10 h5 v-10 h5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>Watt Forge</a>
+<nav class="nav" aria-label="Main"><a href="../learn/fundamentals.html">Learn</a><a href="../tools/designer.html" aria-current="page">Tools</a><a href="../flagship.html">Flagship design</a><a href="../sources.html">Sources</a></nav>
+<button class="theme-btn" type="button">Dark theme</button>
+</div></header>
+<div class="safety" role="note"><div class="inner">Design and simulation reference only. Solar and battery hardware is dangerous: high voltage, stored energy, fire risk. Any physical build is at your own risk and needs proper lab safety practice. <a href="../safety.html">Read the safety note</a>.</div></div>
+<main id="main">
+<h1>SPICE runner</h1>
+<p class="lede">Every number on this site comes from an analytic model. This page checks that model against a circuit simulator. Pick a netlist, read it, change it, and compare what ngspice measures with what the model predicts.</p>
+<p><span class="pill" id="sp-env">Checking environment...</span></p>
+<div class="bench">
+  <div class="bench-grid wide-left">
+    <div class="controls">
+      <div class="control"><label for="sp-preset">Netlist</label><select id="sp-preset"></select></div>
+      <p class="note" id="sp-about"></p>
+      <div class="control"><label for="sp-net">Netlist text (untrusted input: checked before every run)</label>
+        <textarea id="sp-net" class="mono" rows="18" spellcheck="false" maxlength="262144"></textarea></div>
+      <div class="row"><button type="button" class="act" id="sp-run">Run</button><button type="button" class="ghost" id="sp-check">Check only</button><button type="button" class="ghost" id="sp-reset">Restore preset</button></div>
+      <p class="err" id="sp-err" role="alert"></p>
+    </div>
+    <div>
+      <div class="readouts">
+        <div class="readout big"><div class="k">Guard</div><div class="v" id="sp-guard">-</div></div>
+        <div class="readout"><div class="k">Source of result</div><div class="v" id="sp-src">-</div></div>
+        <div class="readout"><div class="k">Run time</div><div class="v" id="sp-time">-</div></div>
+      </div>
+      <div class="tablewrap"><table id="sp-tab"><thead><tr><th>Measurement</th><th class="r">ngspice</th><th class="r">Model / analytic</th><th class="r">Difference</th></tr></thead><tbody></tbody></table></div>
+      <details><summary>Raw ngspice output</summary><pre id="sp-raw" class="mono">Run a netlist in the desktop app to see its raw output here.</pre></details>
+    </div>
+  </div>
+</div>
+
+<h2>Why the flagship netlists read higher than the model</h2>
+<div class="prose">
+  <p>The flagship netlists use ideal switches with the GaN on-resistance and no dead time, so ngspice sees conduction losses only: switch R<sub>ds(on)</sub>, inductor DCR, flying-capacitor ESR and PCB copper. The full model adds output-capacitance, dead-time, gate-drive, core and housekeeping losses on top. The test that matters is that ngspice agrees with the conduction-only result from the repository's own circuit simulator to within 0.005 percentage points. It does, in <code>tests/test_flagship_sim.py</code>, which runs on every commit.</p>
+  <p>Switching losses are not left to SPICE. Ideal-switch models cannot represent output-capacitance energy, and vendor GaN SPICE models are not redistributable here. They come from datasheet charge and energy figures instead; see <a href="../learn/losses.html">loss modelling</a>.</p>
+</div>
+
+<h2>The sandbox</h2>
+<div class="prose">
+  <p>A SPICE netlist is code. An ngspice <code>.control</code> block can run shell commands, and <code>.include</code> can read any file. Every netlist therefore passes the same guard, implemented three times and tested against one shared set of cases. The guard runs in this page as JavaScript, in the desktop app as Rust before ngspice starts, and in Python for the test suite. It rejects control blocks, includes, libraries, unknown elements and dot commands, oversized files, and transient runs over five million points. ngspice then runs in batch mode in an empty temporary folder with a cleared environment, a 60-second limit and a 1 MB output cap. Details: <a data-repo="docs/SECURITY_MODEL.md" href="#">SECURITY_MODEL.md</a>.</p>
+  <p>The web version never executes a netlist. For an unmodified preset it shows the ngspice result stored when the repository was built. Edited netlists run only in the desktop app.</p>
+</div>
+</main>
+<footer><div class="inner">Watt Forge: open-source converter design, MIT licensed. Runs entirely in your browser: no accounts, no analytics, designs stay in this browser's storage. Every efficiency figure on this site is cited with its test conditions on the <a href="../sources.html">Sources</a> page. Models are predictions, not measurements.</div></footer>
+<script type="module" src="../js/ui/ui.js"></script>
+<script type="module" src="../js/pages/spice.js"></script>
+</body>
+</html>
