@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use Watt Forge in teaching or research, please cite it as below."
+title: "Watt Forge: converter design from first principles"
+abstract: "Open-source power-electronics converter design platform: first-principles lessons, live loss models, an MPPT and efficiency-control library benchmarked on EN 50530-style tests, and a hybrid three-level GaN buck-boost reference design for solar."
+type: software
+authors:
+  - given-names: Aleksander
+    family-names: Norman
+version: 0.2.0
+date-released: 2026-10-04
+license: MIT
+repository-code: "https://github.com/Normansrule/watt-forge"
+url: "https://normansrule.github.io/watt-forge/"
+keywords:
+  - power electronics
+  - DC-DC converter
+  - maximum power point tracking
+  - gallium nitride
+  - solar
+  - education

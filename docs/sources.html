@@ -20,7 +20,7 @@
 <nav class="nav" aria-label="Main"><a href="learn/fundamentals.html">Learn</a><a href="tools/designer.html">Tools</a><a href="flagship.html">Flagship design</a><a href="sources.html" aria-current="page">Sources</a></nav>
 <button class="theme-btn" type="button">Dark theme</button>
 </div></header>
-<div class="safety" role="note"><div class="inner">Design and simulation reference only. Solar and battery hardware is dangerous: high voltage, stored energy, fire risk. Any physical build is at your own risk and needs proper lab safety practice. <a href="safety.html">Read the safety note</a>.</div></div>
+<div class="safety" role="note"><div class="inner"><b>Safety</b><span>Design and simulation reference only, not a build guide. Solar and battery hardware can injure: high voltage, stored energy, fire. <a href="safety.html">Read the safety note</a>.</span></div></div>
 <main id="main">
 <div class="prose">
 <h1>Sources</h1>
@@ -47,7 +47,15 @@
 </tbody></table>
 </div>
 </main>
-<footer><div class="inner">Watt Forge: open-source converter design, MIT licensed. Runs entirely in your browser: no accounts, no analytics, designs stay in this browser's storage. Every efficiency figure on this site is cited with its test conditions on the <a href="sources.html">Sources</a> page. Models are predictions, not measurements.</div></footer>
+<footer><div class="inner">
+<div class="cols">
+<div class="about"><a class="brand" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#1d6b4f"/><path d="M6 21 h5 v-10 h5 v10 h5 v-10 h5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>Watt Forge</a><p>Open-source converter design from first principles: lessons, live loss models, control algorithms and a hybrid GaN buck-boost reference design. Runs entirely in your browser: no accounts, no analytics, no third-party requests.</p></div>
+<div><h4>Learn</h4><ul><li><a href="learn/fundamentals.html">Fundamentals</a></li><li><a href="learn/topologies.html">Topologies</a></li><li><a href="learn/switched-capacitor.html">Switched capacitor</a></li><li><a href="learn/losses.html">Loss modelling</a></li><li><a href="learn/devices.html">Devices</a></li><li><a href="learn/control.html">Control and MPPT</a></li><li><a href="learn/frontier.html">The frontier</a></li></ul></div>
+<div><h4>Tools</h4><ul><li><a href="tools/designer.html">Topology designer</a></li><li><a href="tools/losses.html">Loss budget</a></li><li><a href="tools/validator.html">Efficiency validator</a></li><li><a href="tools/devices.html">Si vs GaN vs SiC</a></li><li><a href="tools/mppt.html">MPPT sandbox</a></li><li><a href="tools/control-lab.html">Control lab</a></li><li><a href="tools/spice.html">SPICE runner</a></li></ul></div>
+<div><h4>Project</h4><ul><li><a href="flagship.html">Flagship design</a></li><li><a href="sources.html">Sources</a></li><li><a href="safety.html">Safety note</a></li><li><a data-gh="" href="#">Source code</a></li><li><a data-gh="releases" href="#">Desktop app</a></li><li><a data-repo="docs/SECURITY_MODEL.md" href="#">Security model</a></li></ul></div>
+</div>
+<p class="fine">MIT licensed. Every efficiency figure is cited with its test conditions on the <a href="sources.html">Sources</a> page. Models are predictions, not measurements: simulate and review before building anything.</p>
+</div></footer>
 <script type="module" src="js/ui/ui.js"></script>
 <script type="module" src="js/pages/sources.js"></script>
 </body>

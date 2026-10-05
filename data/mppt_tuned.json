@@ -1,0 +1,168 @@
+{
+ "_about": "Per-algorithm parameters chosen by scripts/tune_mppt.py on the tuning profile (not used for scoring): a grid of 8-12 combinations per algorithm, same seeds for all. Grids were re-centred over several passes until each winner was bracketed by lower-scoring values (PSO restart across two passes: 0.25 beat 0.15 and 0.35) or sat at a physical floor (P&O period 1, an 8-point scan). The 'grids' field shows the final pass.",
+ "grids": {
+  "po": {
+   "step": [
+    0.1,
+    0.15,
+    0.2,
+    0.3
+   ],
+   "period": [
+    1,
+    2
+   ]
+  },
+  "vspo": {
+   "gain": [
+    0.02,
+    0.04,
+    0.08
+   ],
+   "step_min": [
+    0.2,
+    0.3,
+    0.45,
+    0.6
+   ]
+  },
+  "inc": {
+   "step": [
+    0.2,
+    0.3,
+    0.5
+   ],
+   "tol": [
+    0.0,
+    0.001,
+    0.003,
+    0.01
+   ]
+  },
+  "vsinc": {
+   "gain": [
+    0.04,
+    0.08,
+    0.16
+   ],
+   "step_min": [
+    0.2,
+    0.3,
+    0.45,
+    0.6
+   ]
+  },
+  "focv": {
+   "k": [
+    0.82,
+    0.84,
+    0.86,
+    0.88
+   ],
+   "every": [
+    500,
+    1000,
+    2000
+   ]
+  },
+  "esc": {
+   "amp": [
+    0.6,
+    0.8,
+    1.2
+   ],
+   "gain": [
+    0.008,
+    0.016,
+    0.032
+   ]
+  },
+  "pso": {
+   "w": [
+    0.3,
+    0.4,
+    0.6
+   ],
+   "restart": [
+    0.25,
+    0.35,
+    0.5
+   ]
+  },
+  "scan": {
+   "points": [
+    8,
+    10,
+    12,
+    14
+   ],
+   "drop": [
+    0.4,
+    0.45,
+    0.5
+   ]
+  }
+ },
+ "seeds": [
+  101,
+  202
+ ],
+ "best": {
+  "po": {
+   "params": {
+    "step": 0.2,
+    "period": 1
+   },
+   "eta_tuning": 0.943046
+  },
+  "vspo": {
+   "params": {
+    "gain": 0.04,
+    "step_min": 0.3
+   },
+   "eta_tuning": 0.942747
+  },
+  "inc": {
+   "params": {
+    "step": 0.3,
+    "tol": 0.001
+   },
+   "eta_tuning": 0.942798
+  },
+  "vsinc": {
+   "params": {
+    "gain": 0.08,
+    "step_min": 0.3
+   },
+   "eta_tuning": 0.942646
+  },
+  "focv": {
+   "params": {
+    "k": 0.84,
+    "every": 1000
+   },
+   "eta_tuning": 0.936029
+  },
+  "esc": {
+   "params": {
+    "amp": 0.8,
+    "gain": 0.016
+   },
+   "eta_tuning": 0.938685
+  },
+  "pso": {
+   "params": {
+    "w": 0.4,
+    "restart": 0.25
+   },
+   "eta_tuning": 0.989906
+  },
+  "scan": {
+   "params": {
+    "points": 8,
+    "drop": 0.45
+   },
+   "eta_tuning": 0.990368
+  }
+ }
+}

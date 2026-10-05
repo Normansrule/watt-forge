@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "watt-forge"
-version = "0.1.0"
+version = "0.2.0"
 description = "Power-converter design platform: first-principles loss models and a hybrid GaN buck-boost reference design (design and simulation reference only)."
 readme = "README.md"
 license = {text = "MIT"}

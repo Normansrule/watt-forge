@@ -1,0 +1,24 @@
+* text=auto eol=lf
+
+# Binary assets
+*.png binary
+*.gif binary
+*.woff2 binary
+*.xlsx binary
+*.ico binary
+*.icns binary
+
+# Generated files: collapsed in pull-request diffs and left out of GitHub's language statistics.
+# Sources are site/*.html, data/*.json and the scripts in scripts/.
+docs/*.html linguist-generated
+docs/learn/*.html linguist-generated
+docs/tools/*.html linguist-generated
+docs/js/data/** linguist-generated
+docs/data/** linguist-generated
+docs/sw.js linguist-generated
+docs/REFERENCES.md linguist-generated
+data/*.json linguist-generated
+tests/fixtures/** linguist-generated
+requirements.lock linguist-generated
+docs/img/*.svg linguist-generated
+notebooks/*.ipynb linguist-documentation

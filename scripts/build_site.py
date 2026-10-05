@@ -22,6 +22,14 @@ CSP = ("default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' 
 NAV = [("learn", "learn/fundamentals.html", "Learn"), ("tools", "tools/designer.html", "Tools"),
        ("flagship", "flagship.html", "Flagship design"), ("sources", "sources.html", "Sources")]
 
+LESSONS = [("learn/fundamentals.html", "Fundamentals"), ("learn/topologies.html", "Topologies"),
+           ("learn/switched-capacitor.html", "Switched capacitor"), ("learn/losses.html", "Loss modelling"),
+           ("learn/devices.html", "Devices"), ("learn/control.html", "Control and MPPT"), ("learn/frontier.html", "The frontier")]
+TOOLS = [("tools/designer.html", "Topology designer", False), ("tools/losses.html", "Loss budget", False),
+         ("tools/validator.html", "Efficiency validator", False), ("tools/devices.html", "Si vs GaN vs SiC", False),
+         ("tools/mppt.html", "MPPT sandbox", False), ("tools/control-lab.html", "Control lab", True),
+         ("tools/spice.html", "SPICE runner", False)]
+
 LOGO = ('<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#1d6b4f"/>'
         '<path d="M6 21 h5 v-10 h5 v10 h5 v-10 h5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>')
 
@@ -47,11 +55,19 @@ TEMPLATE = """<!doctype html>
 <nav class="nav" aria-label="Main">{nav}</nav>
 <button class="theme-btn" type="button">Dark theme</button>
 </div></header>
-<div class="safety" role="note"><div class="inner">Design and simulation reference only. Solar and battery hardware is dangerous: high voltage, stored energy, fire risk. Any physical build is at your own risk and needs proper lab safety practice. <a href="{base}safety.html">Read the safety note</a>.</div></div>
-<main id="main">
+<div class="safety" role="note"><div class="inner"><b>Safety</b><span>Design and simulation reference only, not a build guide. Solar and battery hardware can injure: high voltage, stored energy, fire. <a href="{base}safety.html">Read the safety note</a>.</span></div></div>
+{subnav}<main id="main">
 {body}
 </main>
-<footer><div class="inner">Watt Forge: open-source converter design, MIT licensed. Runs entirely in your browser: no accounts, no analytics, designs stay in this browser's storage. Every efficiency figure on this site is cited with its test conditions on the <a href="{base}sources.html">Sources</a> page. Models are predictions, not measurements.</div></footer>
+<footer><div class="inner">
+<div class="cols">
+<div class="about"><a class="brand" href="{base}index.html">{logo}Watt Forge</a><p>Open-source converter design from first principles: lessons, live loss models, control algorithms and a hybrid GaN buck-boost reference design. Runs entirely in your browser: no accounts, no analytics, no third-party requests.</p></div>
+<div><h4>Learn</h4><ul>{foot_learn}</ul></div>
+<div><h4>Tools</h4><ul>{foot_tools}</ul></div>
+<div><h4>Project</h4><ul><li><a href="{base}flagship.html">Flagship design</a></li><li><a href="{base}sources.html">Sources</a></li><li><a href="{base}safety.html">Safety note</a></li><li><a data-gh="" href="#">Source code</a></li><li><a data-gh="releases" href="#">Desktop app</a></li><li><a data-repo="docs/SECURITY_MODEL.md" href="#">Security model</a></li></ul></div>
+</div>
+<p class="fine">MIT licensed. Every efficiency figure is cited with its test conditions on the <a href="{base}sources.html">Sources</a> page. Models are predictions, not measurements: simulate and review before building anything.</p>
+</div></footer>
 <script type="module" src="{base}js/ui/ui.js"></script>
 {script}
 </body>
@@ -78,8 +94,21 @@ def build():
             for key, href, label in NAV)
         script = f'<script type="module" src="{base}js/{meta["script"]}"></script>' if meta.get("script") else ""
         body = body.replace("{base}", base)
+        subnav = ""
+        if meta.get("nav") == "learn":
+            links = "".join(f'<a href="{base}{href}"{cur if href == path else ""}><span class="n">{i + 1}</span>{label}</a>'
+                            for i, (href, label) in enumerate(LESSONS))
+            subnav = f'<nav class="subnav" aria-label="Lessons"><div class="inner">{links}</div></nav>\n'
+        elif meta.get("nav") == "tools":
+            badge = '<span class="new">new</span>'
+            links = "".join(f'<a href="{base}{href}"{cur if href == path else ""}>{label}{badge if new else ""}</a>'
+                            for href, label, new in TOOLS)
+            subnav = f'<nav class="subnav" aria-label="Tools"><div class="inner">{links}</div></nav>\n'
+        foot_learn = "".join(f'<li><a href="{base}{href}">{label}</a></li>' for href, label in LESSONS)
+        foot_tools = "".join(f'<li><a href="{base}{href}">{label}</a></li>' for href, label, _ in TOOLS)
         html = TEMPLATE.format(csp=CSP, title=meta["title"], desc=meta.get("desc", meta["title"]), base=base,
-                               logo=LOGO, nav=nav, body=body.strip(), script=script)
+                               logo=LOGO, nav=nav, body=body.strip(), script=script, subnav=subnav,
+                               foot_learn=foot_learn, foot_tools=foot_tools)
         dst = OUT / path
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_text(html)

@@ -1,7 +1,7 @@
 # Watt Forge -- one entry point for building and checking everything.
 PY ?= python3
 
-.PHONY: all install data spice icons figures site test test-py test-js test-rust desktop desktop-dev check-generated zip clean
+.PHONY: all install data control tune spice icons figures site test test-py test-js test-rust desktop desktop-dev check-generated zip clean
 
 all: data figures site test
 
@@ -13,6 +13,12 @@ data:               ## run the design exploration, regenerate data/*.json, web d
 	$(PY) -m watt_forge.flagship.design
 	$(PY) scripts/make_web_data.py
 	$(PY) scripts/make_artifacts.py
+
+control:            ## MPPT benchmark, efficiency controls, daily energy, parity fixture (~10 min, 2 cores)
+	$(PY) scripts/make_control_data.py
+
+tune:               ## re-tune every MPPT tracker on the tuning profile (then run `make control`)
+	$(PY) scripts/tune_mppt.py
 
 spice:              ## re-run the SPICE runner presets in ngspice (needs ngspice on PATH)
 	$(PY) scripts/make_spice_presets.py
@@ -32,9 +38,10 @@ test: test-py test-js test-rust
 test-py:            ## physics, flagship model vs circuit sim vs ngspice, C vs Python controller, HDL testbench, site checks
 	$(PY) -m pytest
 
-test-js:            ## browser model == Python model; browser netlist guard == Python/Rust guard
+test-js:            ## browser models == Python models (physics, netlist guard, control library)
 	node tests/js/parity.mjs
 	node tests/js/guard.mjs
+	node tests/js/control.mjs
 
 test-rust:          ## netlist guard used by the desktop app
 	cd desktop/netlist-guard && cargo test --quiet

@@ -1,6 +1,6 @@
 # References and verified figures
 
-_Last verified: 2026-09-30. Generated from `data/references.json` by `scripts/make_web_data.py`; edit the JSON, not this file._
+_Last verified: 2026-10-04. Generated from `data/references.json` by `scripts/make_web_data.py`; edit the JSON, not this file._
 
 **Rule used everywhere in this repo:** every efficiency figure is quoted with its exact test conditions (input, output, power) and what it includes. A best-case lab number is never presented as typical. Research-stage results are labelled as such.
 
@@ -194,6 +194,115 @@ _Last verified: 2026-09-30. Generated from `data/references.json` by `scripts/ma
 - **Exact conditions:** Secondary source; the primary CEC/Sandia protocol document was not reached. CEC also averages over three DC voltages (not verified here).
 - **In plain language:** Weights used for the weighted-efficiency numbers.
 - **Verification:** VERIFIED (secondary source)
+
+### EN 50530:2010 Overall efficiency of grid connected photovoltaic inverters (amended A1:2013)
+
+- **Authors:** CENELEC (2010). **Venue:** European standard.
+- **Link:** [https://cdn.standards.iteh.ai/samples/16862/e3315d67093e4fe5bbd056330d1ec47b/SIST-EN-50530-2011.pdf](https://cdn.standards.iteh.ai/samples/16862/e3315d67093e4fe5bbd056330d1ec47b/SIST-EN-50530-2011.pdf)
+- **In plain language:** Defines dynamic MPPT efficiency (energy drawn / energy available at the MPP) and the irradiance-ramp test sequences: 30-100 % of nominal at 10, 14, 20, 30, 50 and 100 W/m2/s, and 10-50 % at 0.5 to 50 W/m2/s. The control lab's ramp profiles are compressed versions.
+- **Verification:** VERIFIED (definition from the standard's free preview; ramp slopes from a Bureau Veritas EN 50530 test certificate; repetition counts not verified)
+
+## MPPT and control
+
+### Comparison of photovoltaic array maximum power point tracking techniques
+
+- **Authors:** T. Esram, P. L. Chapman (2007). **Venue:** IEEE Transactions on Energy Conversion 22(2):439-449.
+- **Link:** [10.1109/TEC.2006.874230](https://doi.org/10.1109/TEC.2006.874230)
+- **In plain language:** The standard survey of MPPT methods (19 families). The control lab's algorithm families follow its classification.
+- **Verification:** VERIFIED (Crossref, 2026-10-04)
+
+### Optimization of perturb and observe maximum power point tracking method
+
+- **Authors:** N. Femia, G. Petrone, G. Spagnuolo, M. Vitelli (2005). **Venue:** IEEE Transactions on Power Electronics 20(4):963-973.
+- **Link:** [10.1109/TPEL.2005.850975](https://doi.org/10.1109/TPEL.2005.850975)
+- **In plain language:** How to choose the P&O step size and update period against the converter dynamics. Basis of the fixed- and variable-step P&O trackers.
+- **Verification:** VERIFIED (Crossref, 2026-10-04)
+
+### Maximum photovoltaic power tracking: an algorithm for rapidly changing atmospheric conditions
+
+- **Authors:** K. H. Hussein, I. Muta, T. Hoshino, M. Osakada (1995). **Venue:** IEE Proceedings - Generation, Transmission and Distribution 142(1):59-64.
+- **Link:** [10.1049/ip-gtd:19951577](https://doi.org/10.1049/ip-gtd:19951577)
+- **In plain language:** Introduces incremental conductance: at the MPP dI/dV = -I/V, so the sign of dI/dV + I/V tells the tracker which side of the peak it is on. In principle it can hold at the peak instead of hunting; in practice it still needs voltage changes to measure dI/dV.
+- **Verification:** VERIFIED (Crossref: title, venue, DOI; full author list and pages from Semantic Scholar)
+
+### A variable step size INC MPPT method for PV systems
+
+- **Authors:** F. Liu, S. Duan, F. Liu, B. Liu, Y. Kang (2008). **Venue:** IEEE Transactions on Industrial Electronics 55(7):2622-2628.
+- **Link:** [10.1109/TIE.2008.920550](https://doi.org/10.1109/TIE.2008.920550)
+- **In plain language:** Variable-step incremental conductance: step proportional to |dP/dV|, fast far from the MPP and fine near it.
+- **Verification:** VERIFIED (Crossref, 2026-10-04)
+
+### Theoretical and experimental analyses of photovoltaic systems with voltage- and current-based maximum power-point tracking
+
+- **Authors:** M. A. S. Masoum, H. Dehbonei, E. F. Fuchs (2002). **Venue:** IEEE Transactions on Energy Conversion 17(4):514-522.
+- **Link:** [10.1109/TEC.2002.805205](https://doi.org/10.1109/TEC.2002.805205)
+- **In plain language:** Fractional open-circuit-voltage and short-circuit-current tracking: cheap, but the Vmpp/Voc ratio drifts with conditions.
+- **Verification:** VERIFIED (Crossref, 2026-10-04)
+
+### Dynamic maximum power point tracking of photovoltaic arrays using ripple correlation control
+
+- **Authors:** T. Esram, J. W. Kimball, P. T. Krein, P. L. Chapman, P. Midya (2006). **Venue:** IEEE Transactions on Power Electronics 21(5):1282-1291.
+- **Link:** [10.1109/TPEL.2006.880242](https://doi.org/10.1109/TPEL.2006.880242)
+- **In plain language:** Ripple correlation control: correlate the converter's own switching ripple in power and voltage to climb to the MPP. The control lab's extremum-seeking tracker uses the same principle with an injected low-frequency dither (see also Leyva et al. 2006, Brunton et al. 2010).
+- **Verification:** VERIFIED (Crossref, 2026-10-04)
+
+### Discrete-time ripple correlation control for maximum power point tracking
+
+- **Authors:** J. W. Kimball, P. T. Krein (2008). **Venue:** IEEE Transactions on Power Electronics 23(5):2353-2362.
+- **Link:** [10.1109/TPEL.2008.2001913](https://doi.org/10.1109/TPEL.2008.2001913)
+- **In plain language:** Sampled-data form of ripple correlation control, suited to digital controllers.
+- **Verification:** VERIFIED (Crossref, 2026-10-04)
+
+### Maximum power point tracking of multiple photovoltaic arrays: a PSO approach
+
+- **Authors:** M. Miyatake, M. Veerachary, F. Toriumi, N. Fujii, H. Ko (2011). **Venue:** IEEE Transactions on Aerospace and Electronic Systems 47(1):367-380.
+- **Link:** [10.1109/TAES.2011.5705681](https://doi.org/10.1109/TAES.2011.5705681)
+- **In plain language:** Particle swarm optimisation for the global MPP under partial shading. The control lab's swarm uses the standard PSO update with its own tuned coefficients.
+- **Verification:** VERIFIED (Crossref, 2026-10-04)
+
+### Maximum power point tracking scheme for PV systems operating under partially shaded conditions
+
+- **Authors:** H. Patel, V. Agarwal (2008). **Venue:** IEEE Transactions on Industrial Electronics 55(4):1689-1698.
+- **Link:** [10.1109/TIE.2008.917118](https://doi.org/10.1109/TIE.2008.917118)
+- **In plain language:** Why bypass diodes create multiple maxima, and a global search followed by local tracking: the strategy of the flagship controller.
+- **Verification:** VERIFIED (Crossref, 2026-10-04)
+
+### MPPT of photovoltaic systems using extremum-seeking control
+
+- **Authors:** R. Leyva, C. Alonso, I. Queinnec, A. Cid-Pastor, D. Lagrange, L. Martinez-Salamero (2006). **Venue:** IEEE Transactions on Aerospace and Electronic Systems 42(1):249-258.
+- **Link:** [10.1109/TAES.2006.1603420](https://doi.org/10.1109/TAES.2006.1603420)
+- **In plain language:** Extremum-seeking control applied to PV maximum power point tracking: perturb, demodulate the power response and integrate the estimated gradient. The basis of the control lab's extremum-seeking tracker.
+- **Verification:** VERIFIED (Crossref, 2026-10-04)
+
+### Maximum power point tracking for photovoltaic optimization using ripple-based extremum seeking control
+
+- **Authors:** S. L. Brunton, C. W. Rowley, S. R. Kulkarni, C. Clarkson (2010). **Venue:** IEEE Transactions on Power Electronics 25(10):2531-2540.
+- **Link:** [10.1109/TPEL.2010.2049747](https://doi.org/10.1109/TPEL.2010.2049747)
+- **In plain language:** Extremum seeking that uses the converter's own ripple as the perturbation, linking classical extremum seeking with ripple correlation control.
+- **Verification:** VERIFIED (Crossref, 2026-10-04)
+
+## Efficiency control
+
+### Sensorless optimization of dead times in dc-dc converters with synchronous rectifiers
+
+- **Authors:** V. Yousefzadeh, D. Maksimovic (2006). **Venue:** IEEE Transactions on Power Electronics 21(4):994-1002.
+- **Link:** [10.1109/TPEL.2006.876850](https://doi.org/10.1109/TPEL.2006.876850)
+- **In plain language:** Online dead-time optimisation by minimising input power (via the duty cycle) without extra sensors: the idea behind the adaptive dead-time control.
+- **Verification:** VERIFIED (Crossref, 2026-10-04)
+
+### Digital multimode buck converter control with loss-minimizing synchronous rectifier adaptation
+
+- **Authors:** A. V. Peterchev, S. R. Sanders (2006). **Venue:** IEEE Transactions on Power Electronics 21(6):1588-1599.
+- **Link:** [10.1109/TPEL.2006.882968](https://doi.org/10.1109/TPEL.2006.882968)
+- **In plain language:** Online loss minimisation and automatic pulse skipping at very light load, the family of controls the burst-mode model belongs to.
+- **Verification:** VERIFIED (Crossref, 2026-10-04)
+
+### Adaptive digital controller and design considerations for a variable switching frequency voltage regulator
+
+- **Authors:** W. Al-Hoor, J. A. Abu-Qahouq, L. Huang, W. B. Mikhael, I. Batarseh (2009). **Venue:** IEEE Transactions on Power Electronics 24(11):2589-2602.
+- **Link:** [10.1109/TPEL.2009.2031439](https://doi.org/10.1109/TPEL.2009.2031439)
+- **In plain language:** Adaptive frequency optimisation: a controller that continuously finds the switching frequency with minimum total loss, as the control lab's hill climb does.
+- **Verification:** VERIFIED (Crossref, 2026-10-04)
 
 ## Component data
 

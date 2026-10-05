@@ -1,0 +1,105 @@
+<!-- title: Control lab | path: tools/control-lab.html | nav: tools | script: pages/control-lab.js | desc: Eight MPPT algorithms raced on EN 50530-style ramps, clouds and partial shading, plus the converter controls that raise efficiency: adaptive switching frequency, adaptive dead time, burst mode and bypass. -->
+<h1>Control lab</h1>
+<p class="lede">A converter is only as efficient as the controller running it. This lab races eight maximum power point tracking (MPPT) algorithms against the same simulated panel, sensors and test profiles. It then turns to the controls that cut the converter's own losses: frequency, dead time, burst mode and bypass. Every number here is computed in your browser, by the same code the repository tests in Python and C.</p>
+
+<nav class="toc" aria-label="On this page">
+  <a href="#leaderboard">Leaderboard</a><a href="#race">Watch them track</a><a href="#tune">Tune one</a><a href="#eff">Efficiency controls</a><a href="#day">A day of sun</a><a href="#method">Method</a>
+</nav>
+
+<section id="leaderboard">
+<h2>Leaderboard</h2>
+<p>Dynamic MPPT efficiency is the EN 50530 definition: energy actually drawn from the panel divided by the energy available at its global maximum power point. Each cell is the mean of three sensor-noise seeds. The <b>system</b> column also counts the flagship converter's conversion losses at the voltage each tracker chose.</p>
+<div class="tablewrap"><table id="cl-board" class="board"><thead></thead><tbody></tbody></table></div>
+<p class="note" id="cl-board-note"></p>
+</section>
+
+<section id="race">
+<h2>Watch them track</h2>
+<div class="bench">
+  <div class="bench-grid">
+    <div class="controls">
+      <div class="control"><label for="cl-profile">Test profile</label><select id="cl-profile"></select></div>
+      <fieldset class="chips" id="cl-algos"><legend>Trackers</legend></fieldset>
+      <div class="control"><label for="cl-noise">Sensor noise <output for="cl-noise"></output></label><input id="cl-noise" type="range" min="0" max="4" step="0.5" value="1"></div>
+      <div class="row"><button type="button" class="act" id="cl-run">Run</button><span class="note" id="cl-status" role="status"></span></div>
+      <div class="progress" hidden><div class="bar c1" id="cl-prog"></div></div>
+      <p class="note">Noise 1x is 20 mV and 10 mA (sigma, after averaging), plus 12-bit quantisation. 0x turns noise off.</p>
+    </div>
+    <div>
+      <div id="cl-pchart"></div>
+      <div id="cl-vchart"></div>
+      <div id="cl-loss"></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="tune">
+<h2>Tune one</h2>
+<p>Every tracker's two most important parameters were chosen by the same grid search, on a tuning profile that is never used for scoring. Move them and see what the choice costs.</p>
+<div class="bench">
+  <div class="bench-grid">
+    <div class="controls">
+      <div class="control"><label for="tn-algo">Tracker</label><select id="tn-algo"></select></div>
+      <div id="tn-params"></div>
+      <div class="control"><label for="tn-profile">On profile</label><select id="tn-profile"></select></div>
+      <div class="row"><button type="button" class="act" id="tn-run">Compare with tuned</button><button type="button" class="ghost" id="tn-reset">Reset to tuned</button></div>
+      <p class="note" id="tn-status" role="status"></p>
+    </div>
+    <div>
+      <div class="readouts">
+        <div class="readout big"><div class="k">Your settings</div><div class="v" id="tn-mine">-</div></div>
+        <div class="readout"><div class="k">Tuned settings</div><div class="v" id="tn-tuned">-</div></div>
+        <div class="readout"><div class="k">Difference</div><div class="v" id="tn-diff">-</div></div>
+      </div>
+      <div id="tn-chart"></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="eff">
+<h2>Efficiency controls</h2>
+<p>Pick an operating point. For frequency and dead time the controller has no loss model. It measures power, averaged to about 25-35 mW resolution, and steps one setting at a time, keeping a step only when the saving beats that resolution (a hill climb). The charts show the loss model's view of each setting, and where the hill climb ends up.</p>
+<div class="bench">
+  <div class="bench-grid">
+    <div class="controls">
+      <div class="control"><label for="ef-vin">Panel voltage <output for="ef-vin"></output></label><input id="ef-vin" type="range" min="14" max="58" step="1" value="36"></div>
+      <div class="control"><label for="ef-p">Output power <output for="ef-p"></output></label><input id="ef-p" type="range" min="5" max="400" step="5" value="60"></div>
+      <div class="readouts">
+        <div class="readout big"><div class="k">Loss saved</div><div class="v" id="ef-saved">-</div></div>
+        <div class="readout"><div class="k">Efficiency, fixed settings</div><div class="v" id="ef-eta0">-</div></div>
+        <div class="readout"><div class="k">Efficiency, all controls</div><div class="v" id="ef-eta1">-</div></div>
+      </div>
+      <div id="ef-steps"></div>
+      <p class="note" id="ef-burst"></p>
+    </div>
+    <div>
+      <div id="ef-fs"></div>
+      <div id="ef-td"></div>
+      <p class="note" id="ef-hc"></p>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="day">
+<h2>A day of sun</h2>
+<p>One clear day, 06:00 to 18:00, with a cloudy hour after noon. The panel feeds a 51.2 V battery through the flagship converter. This is where the energy goes, with each control switched on in turn.</p>
+<div class="split">
+  <div id="day-water"></div>
+  <div id="day-chart"></div>
+</div>
+<p class="note" id="day-note"></p>
+</section>
+
+<section id="method">
+<h2>Method</h2>
+<div class="prose">
+  <p><b>Plant.</b> The panel is a 72-cell single-diode model with three bypass-diode substrings, simulated every 20 ms. The converter's input-voltage loop closes 98 % of the error to the commanded voltage each tick. Sensors add noise (sigma 20 mV and 10 mA) and 12-bit quantisation over 0-72 V and 0-20 A. A tracker sees the settled half of each update window.</p>
+  <p><b>Profiles.</b> The two ramp profiles keep the EN 50530 dynamic-test shape: trapezoids between 30 % and 100 % of nominal irradiance, and between 10 % and 50 %. They use four of the standard slopes each, with 10 s dwells. The standard itself repeats slopes with longer dwells, so this is a compressed test, not a compliance test. The cloud and partial-shading profiles test fast transients and multiple power maxima. The steady profile includes each tracker's start-up search.</p>
+  <p><b>Fairness.</b> Every tracker gets the same kind of tuning: a grid of 8 to 12 combinations over its two most important parameters, on a separate tuning profile (<a data-repo="scripts/tune_mppt.py" href="#">scripts/tune_mppt.py</a>). Grids were re-centred until each winner was bracketed by lower-scoring values or sat at a physical floor (P&amp;O updating every tick, an 8-point scan). Particle swarm's restart threshold was bracketed across two passes: 0.25 beat 0.15 in one and 0.35 in the other. The tuning profile includes shade, which pulls fractional Voc's k away from its best value in even light. The lesson discusses this. Results are the mean of three noise seeds.</p>
+  <p><b>Efficiency controls.</b> The controls are evaluated on the flagship loss model, including its dead-time physics: incomplete soft switching when the dead time is too short, reverse conduction when it is too long. The frequency and dead-time hill climbs see the loss only through noisy power measurements: the bench's sensors, averaged over 5 s (about 25-35 mW resolution). Each loss shown is the mean over 20 noise trials. Burst-mode and bypass settings are design-time choices made with the model. Burst mode pays for its input-capacitor ripple: the panel wanders off its maximum power point between bursts, so the loss counts kappa x dV<sup>2</sup>/24, where kappa is the curvature of the power-voltage curve. Ripple is capped at 5 % of the panel voltage, and kappa is scaled from the reference panel as P/V<sup>2</sup>. Bypass pays (1/2) kappa (V_mpp - V_bat)<sup>2</sup> for pinning the panel. Housekeeping power and the wake-up energy per burst are estimates.</p>
+  <p><b>Same code everywhere.</b> The trackers and the hill climb exist in Python (<a data-repo="watt_forge/control/mppt.py" href="#">watt_forge/control</a>), JavaScript (this page) and C (<a data-repo="hardware/flagship/control/wf_mppt.c" href="#">wf_mppt.c</a>). The tests require JavaScript to match Python to rounding error, and C to match Python decision for decision. All three are reference implementations: simulate and review before use.</p>
+</div>
+</section>

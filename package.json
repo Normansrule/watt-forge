@@ -1,10 +1,10 @@
 {
   "name": "watt-forge-web",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Static web app in docs/. No runtime or build dependencies: the site ships its own ES modules.",
   "type": "module",
   "license": "MIT",
   "engines": { "node": ">=20" },
-  "scripts": { "test": "node tests/js/parity.mjs && node tests/js/guard.mjs" }
+  "scripts": { "test": "node tests/js/parity.mjs && node tests/js/guard.mjs && node tests/js/control.mjs" }
 }

@@ -1,0 +1,29 @@
+name: Bug report
+description: Something computes, renders or builds wrongly
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Security problem? Please report it privately instead (Security tab > Report a vulnerability)."
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where
+      options: [Web app, Desktop app, Lessons / equations, Flagship design, Control library, Python package, C / Verilog reference, Build or CI]
+    validations: { required: true }
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+      description: For a wrong number, give the inputs, the value you got, the value you expected and why (a source or a hand calculation).
+    validations: { required: true }
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Open tools/control-lab.html  2. ..."
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: "v0.2.0, or the commit hash"

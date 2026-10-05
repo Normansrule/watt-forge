@@ -112,9 +112,10 @@ fn simulate_netlist(netlist: String) -> Result<String, String> {
     Ok(out)
 }
 
-/// End-to-end self-test, used by CI and `make desktop-smoke`: with WATTFORGE_SMOKE=1 the app opens the
-/// SPICE runner page, runs a netlist through the real page -> IPC -> guard -> ngspice path, reports the
-/// result here, and exits with status 0 (pass) or 1 (fail). Without the variable this command does nothing.
+/// End-to-end self-test, used by CI: with WATTFORGE_SMOKE=1 the app runs a netlist through the real
+/// page -> IPC -> guard -> ngspice path, checks the guard rejects a malicious netlist, runs one MPPT
+/// benchmark in the control lab's module Web Worker, reports here, and exits with status 0 (pass) or
+/// 1 (fail). Without the variable this command does nothing.
 #[tauri::command]
 fn smoke_report(app: tauri::AppHandle, ok: bool, detail: String) {
     if std::env::var_os("WATTFORGE_SMOKE").is_none() {
@@ -135,8 +136,22 @@ const SMOKE_JS: &str = r#"
     const m = /vavg\s*=\s*([-+0-9.eE]+)/.exec(out);
     let rejected = false;
     try { await t.invoke('simulate_netlist', { netlist: '* x\n.control\nshell ls\n.endc\n.end\n' }); } catch (e) { rejected = true; }
-    const ok = !!m && Math.abs(parseFloat(m[1]) - 12) < 0.05 && rejected;
-    await report(ok, `vavg=${m ? m[1] : 'missing'} guard_rejected=${rejected} page=${location.pathname}`);
+    // the control lab's benchmark worker (module worker under the app's CSP) must run too
+    const worker = await new Promise((resolve) => {
+      let w;
+      const timer = setTimeout(() => resolve('timeout'), 60000);
+      try { w = new Worker(new URL('js/workers/control-worker.js', location.href), { type: 'module' }); }
+      catch (e) { clearTimeout(timer); resolve('blocked: ' + e); return; }
+      w.onerror = (e) => { clearTimeout(timer); resolve('error: ' + (e.message || 'worker error')); };
+      w.onmessage = (ev) => {
+        if (ev.data.done) { clearTimeout(timer); resolve(ev.data.results.po.eta_mppt); }
+        else if (ev.data.error) { clearTimeout(timer); resolve('error: ' + ev.data.error); }
+      };
+      w.postMessage({ id: 1, profile: 'steady', keys: ['po'], seeds: [7] });
+    });
+    const workerOk = typeof worker === 'number' && worker > 0.99;
+    const ok = !!m && Math.abs(parseFloat(m[1]) - 12) < 0.05 && rejected && workerOk;
+    await report(ok, `vavg=${m ? m[1] : 'missing'} guard_rejected=${rejected} worker_eta=${worker} page=${location.pathname}`);
   } catch (e) { await report(false, e); }
 })();
 "#;

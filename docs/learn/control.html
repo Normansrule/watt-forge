@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; worker-src 'self'">
 <meta name="referrer" content="no-referrer">
 <title>6. Control and MPPT - Watt Forge</title>
-<meta name="description" content="PWM control, maximum power point tracking with perturb-and-observe, partial shading, and the flagship's supervisory state machine.">
+<meta name="description" content="PWM control, eight maximum power point tracking algorithms compared on EN 50530-style tests, and the converter controls that raise efficiency: adaptive frequency, adaptive dead time, burst mode and bypass.">
 <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../css/site.css">
 <link rel="manifest" href="../manifest.webmanifest">
@@ -20,18 +20,19 @@
 <nav class="nav" aria-label="Main"><a href="../learn/fundamentals.html" aria-current="page">Learn</a><a href="../tools/designer.html">Tools</a><a href="../flagship.html">Flagship design</a><a href="../sources.html">Sources</a></nav>
 <button class="theme-btn" type="button">Dark theme</button>
 </div></header>
-<div class="safety" role="note"><div class="inner">Design and simulation reference only. Solar and battery hardware is dangerous: high voltage, stored energy, fire risk. Any physical build is at your own risk and needs proper lab safety practice. <a href="../safety.html">Read the safety note</a>.</div></div>
+<div class="safety" role="note"><div class="inner"><b>Safety</b><span>Design and simulation reference only, not a build guide. Solar and battery hardware can injure: high voltage, stored energy, fire. <a href="../safety.html">Read the safety note</a>.</span></div></div>
+<nav class="subnav" aria-label="Lessons"><div class="inner"><a href="../learn/fundamentals.html"><span class="n">1</span>Fundamentals</a><a href="../learn/topologies.html"><span class="n">2</span>Topologies</a><a href="../learn/switched-capacitor.html"><span class="n">3</span>Switched capacitor</a><a href="../learn/losses.html"><span class="n">4</span>Loss modelling</a><a href="../learn/devices.html"><span class="n">5</span>Devices</a><a href="../learn/control.html" aria-current="page"><span class="n">6</span>Control and MPPT</a><a href="../learn/frontier.html"><span class="n">7</span>The frontier</a></div></nav>
 <main id="main">
 <div class="prose">
 <p class="note">Lesson 6 of 7</p>
 <h1>Control and maximum power point tracking</h1>
-<p class="lede">A converter's duty cycle is a knob. For a solar converter the question is which way to turn it: a panel delivers its maximum power at one particular voltage, and that voltage moves with sunlight, temperature and shade.</p>
+<p class="lede">A converter's duty cycle is a knob. For a solar converter there are two questions. Which panel voltage should it hold, as sunlight, temperature and shade move the panel's best operating point? And how should it switch to waste the least on the way? This lesson answers both, with eight tracking algorithms and four efficiency controls, all measured on the same bench.</p>
 
 <h2>PWM: two loops</h2>
-<p>A pulse-width modulator (PWM) compares a control voltage with a carrier ramp to produce the gate pulses, so the duty cycle follows the control voltage. A fast inner loop (tens of kilohertz bandwidth) adjusts it to hold the <i>panel</i> voltage at a reference. A slow outer loop, the maximum power point tracker (MPPT), moves that reference. In the flagship the inner loop runs in the microcontroller's high-resolution timer and the outer loop is the 1 kHz state machine below.</p>
+<p>A pulse-width modulator (PWM) compares a control voltage with a carrier ramp to make the gate pulses, so the duty cycle follows the control voltage. A fast inner loop, with a few kilohertz of bandwidth, holds the <i>panel</i> voltage at a reference. A slow outer loop, the maximum power point tracker (MPPT), moves that reference 10 to 50 times a second. The outer loop must wait for the inner one to settle before it reads the power, or it chases its own transients (Femia et al. 2005).</p>
 
 <h2>The panel's power curve</h2>
-<p>A PV cell is a current source in parallel with a diode. Short-circuited it delivers its photocurrent at zero volts; open-circuited it reaches V_oc at zero current. Power peaks in between at the maximum power point (MPP). A panel is built from substrings, each with a bypass diode. Shade one substring and the curve grows a second hill, so a tracker that only climbs locally can get stuck on the smaller one.</p>
+<p>A PV cell is a current source in parallel with a diode. Short-circuited, it delivers its photocurrent at zero volts. Open-circuited, it reaches V_oc at zero current. Power peaks in between, at the maximum power point (MPP). A panel is built from substrings, each with a bypass diode. Shade one substring and the curve grows a second hill. A tracker that only climbs locally can get stuck on the smaller one.</p>
 </div>
 <div class="bench">
   <div class="bench-grid">
@@ -44,22 +45,89 @@
         <div class="readout"><div class="k">V_oc</div><div class="v" id="pv-voc">-</div></div>
         <div class="readout"><div class="k">Local maxima</div><div class="v" id="pv-n">-</div></div>
       </div>
-      <p class="note">Generic 72-cell, ~390 W-class panel model (single-diode cells, three bypass-diode substrings). Not a specific product.</p>
+      <p class="note">A generic 72-cell, ~390 W-class panel model (single-diode cells, three bypass-diode substrings), not a specific product.</p>
     </div>
     <div id="pv-chart"></div>
   </div>
 </div>
+
 <div class="prose">
-<h2>Perturb and observe</h2>
-<p>Perturb and observe (P&amp;O) is the simplest tracker: nudge the voltage reference, measure the power, and if power fell, reverse direction. It hunts around the peak, so the step size is a trade-off between tracking speed and steady-state wobble. The flagship's tracker adapts the step: it halves after eight nearly-flat steps and doubles after a big change. Against partial shading it starts, and periodically restarts, with a 40-point global sweep, re-sweeping immediately if power suddenly drops by 30 %.</p>
+<h2>How trackers are scored</h2>
+<p>EN 50530 defines <b>dynamic MPPT efficiency</b> as the energy actually drawn from the panel over a test, divided by the energy it could have delivered at its maximum power point:</p>
+<div class="eqbox"><span class="eq">eta_MPPT = sum(V_pv I_pv dt) / sum(P_MPP dt)</span></div>
+<p>The standard's dynamic test ramps the irradiance up and down between 30 % and 100 % of nominal, and between 10 % and 50 %, at slopes from 0.5 to 100 W/m<sup>2</sup>/s. The <a href="../tools/control-lab.html">control lab</a> runs compressed versions of both ramp sequences, plus cloud edges, partial shading and steady light. Every tracker gets the same simulated panel and sensor noise, and the same kind of two-parameter tuning. Numbers below come from that benchmark (mean of three noise seeds). The line under each tracker gives its dynamic MPPT efficiency on the EN 50530-style 30-100 % ramps, on cloud edges and under partial shading. The ramps are compressed and this is not a compliance test.</p>
+
+<h2>Hill climbers</h2>
+<h3>Perturb and observe (P&amp;O), fixed step</h3>
+<p>Nudge the voltage reference, measure the power, keep going if power rose and reverse if it fell. It is simple and needs no model, but it never stops: in steady light it oscillates around the peak by about one step. During a ramp it can misread a rise in sunlight as a good step and walk the wrong way.</p>
+<div class="eqbox"><span class="eq">if P_k &lt; P_k-1: d = -d;&nbsp;&nbsp;&nbsp;&nbsp;V_ref,k+1 = V_ref,k + d * dV</span></div>
+<p class="benchline" data-key="po"></p>
+<h3>P&amp;O, variable step</h3>
+<p>Scale the step with the slope of the power curve: big steps far from the peak, where |dP/dV| is large, and small steps near it. It converges faster, but noise on a small slope can leave it timid at the top.</p>
+<div class="eqbox"><span class="eq">dV = clamp(N * |dP/dV|, dV_min, dV_max)</span></div>
+<p class="benchline" data-key="vspo"></p>
+<h3>Incremental conductance (InC)</h3>
+<p>At the MPP, dP/dV = I + V dI/dV = 0, so dI/dV = -I/V. Comparing the incremental conductance dI/dV with the instantaneous conductance -I/V tells the tracker which side of the peak it is on (Hussein et al. 1995). In principle it can then hold still at the peak instead of hunting. In practice it still needs voltage changes to measure dI/dV, and noise keeps it stepping. When the voltage has not moved, a change in current means the light changed, which helps it tell a cloud from its own step. In this benchmark that pays off only for the variable-step version: fixed-step InC does no better than P&amp;O on cloud edges.</p>
+<div class="eqbox"><span class="eq">dI/dV + I/V &gt; 0: MPP is to the right;&nbsp;&nbsp;&lt; 0: to the left;&nbsp;&nbsp;~ 0: hold</span></div>
+<p class="benchline" data-key="inc"></p>
+<h3>InC, variable step</h3>
+<p>The same test with a step proportional to |dP/dV| (Liu et al. 2008).</p>
+<p class="benchline" data-key="vsinc"></p>
+
+<h2>Model-based: fractional open-circuit voltage</h2>
+<p>For crystalline silicon, V_mpp/V_oc stays near a constant k. For this panel model k is 0.79 to 0.84 across light and temperature. Disconnect the panel briefly, measure V_oc, and regulate to k V_oc (Masoum et al. 2002). It is cheap and insensitive to noise. But it is never exactly on the peak, because k drifts, and it harvests nothing while it measures. Its biggest weakness shows in the tuning: shade pulls the best k up, strong even light pulls it down, and one constant cannot serve both. The tuned k = 0.84 scores 97.8 % in steady light, where k = 0.80 would score 99.9 %.</p>
+<div class="eqbox"><span class="eq">V_ref = k * V_oc,&nbsp;&nbsp;V_oc re-measured every T seconds (one open-circuit sample)</span></div>
+<p class="benchline" data-key="focv"></p>
+
+<h2>Gradient: extremum seeking and ripple correlation</h2>
+<p>Add a small sinusoidal dither a sin(wt) to the voltage. The power then wobbles with an amplitude proportional to dP/dV, in phase on the left of the peak and in anti-phase on the right. High-pass the power, multiply by the dither and integrate, and the product averages to a value proportional to dP/dV: a gradient climb (Leyva et al. 2006). With an ideal high-pass filter it is (a/2) dP/dV; the simple filter used here delivers about 0.8 of that. Ripple correlation control (RCC) does the same with the converter's own switching ripple as the dither, at kilohertz rates (Esram et al. 2006; Kimball &amp; Krein 2008; Brunton et al. 2010). Our 50 Hz bench cannot see switching ripple, so it injects a 5 Hz dither instead.</p>
+<div class="eqbox"><span class="eq">V_hat += K * HPF(P) * sin(wt);&nbsp;&nbsp;&nbsp;&nbsp;V_ref = V_hat + a sin(wt);&nbsp;&nbsp;&nbsp;&nbsp;avg(HPF(P) sin) &prop; dP/dV</span></div>
+<p class="benchline" data-key="esc"></p>
+
+<h2>Global search: particle swarm and scan-and-track</h2>
+<p>Partial shading defeats every local method above: they all climb whichever hill they start on. Global methods look at the whole curve first. A particle swarm (PSO) moves a few candidate voltages toward their own best and the swarm's best, then hands over to local tracking (Miyatake et al. 2011). Scan-and-track sweeps the voltage window and parks at the best point (Patel &amp; Agarwal 2008). The swarm restarts on any large change in power, and the scan on a large drop or once a minute. That is their weakness: every cloud edge looks like a possible new shading pattern, so they spend energy re-searching.</p>
+<div class="eqbox"><span class="eq">v_j = w v_j + c1 r1 (pbest_j - x_j) + c2 r2 (gbest - x_j);&nbsp;&nbsp;&nbsp;&nbsp;x_j += v_j</span></div>
+<p class="benchline" data-key="pso"></p>
+<p class="benchline" data-key="scan"></p>
+
+<h2>Which one?</h2>
+<div class="tablewrap"><table id="cmp-table"><thead><tr><th>Tracker</th><th>Family</th><th class="r">EN 50530-style 30-100 %</th><th class="r">Clouds</th><th class="r">Shading</th><th class="r">Overall</th></tr></thead><tbody></tbody></table></div>
+<p>On slow ramps and in steady light, the hill climbers and extremum seeking all reach 99.7-99.9 %, and the differences are tenths of a percent. Cloud edges spread them out more (97.8-99.8 %). Under partial shading, only the global methods escape the local peak, and the gap is tens of percent. The flagship controller therefore uses scan-and-track: it gives up a few tenths on clean ramps to be safe when shade arrives. Particle swarm scores slightly higher overall in this benchmark. The scan has fewer parameters and no random numbers, so its worst case is easier to bound. Both have C references tested identical to the Python. Race them yourself in the <a href="../tools/control-lab.html#race">control lab</a>.</p>
+
+<h2>Controls that cut the converter's own loss</h2>
+<p>Once the operating point is chosen, the controller can still change <i>how</i> it switches. Adaptive frequency and dead time are tuned online from power measurements alone. The controller steps one setting, keeps the step only if the measured power at the same operating point improved by more than its measurement resolution, and otherwise turns around. Averaging five seconds of measurements resolves about 25-35 mW. So the frequency climb usually lands on the optimum, while the dead-time climb usually stops short, where the remaining gains are smaller than the sensors can see. Burst mode and bypass are different: they are design-time rules worked out with the model. In the loss model, the gains are largest at light load, which is where a solar converter spends its mornings and evenings.</p>
+<h3>Adaptive switching frequency</h3>
+<p>Switching losses (output charge, overlap, gate drive) grow in proportion to f_s. Ripple-driven losses (inductor AC copper and core, RMS current) shrink as f_s rises. Their sum has a minimum, and it moves with voltage ratio and load (Al-Hoor et al. 2009).</p>
+<div class="eqbox"><span class="eq">P_loss(f) ~ A f + B / f<sup>n</sup> + C,&nbsp;&nbsp;n ~ 1.3-2&nbsp;&nbsp;&nbsp;&nbsp;(ripple falls as 1/f; copper and core losses fall faster or slower than that)</span></div>
+<h3>Adaptive dead time</h3>
+<p>Too short a dead time and the inductor current cannot finish swinging the switch node, so the incoming switch turns on into leftover voltage (residual fraction r). Too long and the current freewheels through the GaN switch's reverse channel, which drops about 2-3 V, far more than a silicon diode. The optimum depends on the current, so it moves with load (Yousefzadeh &amp; Maksimovic 2006).</p>
+<div class="eqbox"><span class="eq">r = max(0, 1 - |i| t_d / (2 Q_oss));&nbsp;&nbsp;&nbsp;P_Coss ~ Q_oss V r<sup>2</sup> f;&nbsp;&nbsp;&nbsp;P_rc ~ V_sd |i| max(0, t_d - 2 Q_oss/|i|) f</span></div>
+<h3>Burst mode</h3>
+<p>At light load the fixed losses (gate drive, housekeeping) dominate. Burst mode switches at an efficient power P_b for a fraction delta = P/P_b of the time and idles in between (Peterchev &amp; Sanders 2006). On a solar input it has a hidden cost. The panel keeps pushing current into the input capacitor between bursts, so the panel voltage ripples and leaves the MPP. The model counts it: a triangular ripple dV costs kappa dV<sup>2</sup>/24, where kappa is the curvature of the power-voltage curve. That is a small-signal estimate, so bursts are only allowed while the ripple stays under 5 % of the panel voltage. Much of the gain comes from idling the housekeeping supplies between bursts (0.55 W down to 0.30 W, both estimates), so read the numbers as a model of the trade-off, not a promise.</p>
+<div class="eqbox"><span class="eq">delta = P/P_b;&nbsp;&nbsp;dV_pp = I_pv (1 - delta) / (f_b C_in);&nbsp;&nbsp;P_loss = delta P_stage(P_b) + P_aux + E_wake f_b + kappa dV_pp<sup>2</sup>/24</span></div>
+<h3>Bypass</h3>
+<p>When the panel's MPP sits within 2 % of the battery voltage, the flagship closes a bidirectional GaN switch and stops switching altogether. It saves all switching loss but pins the panel at battery voltage. That costs about (1/2) kappa (V_mpp - V_bat)<sup>2</sup> of tracking loss. The efficiency model weighs it against the saving; the reference controller still uses a simple 2 % band.
+<p>Turn the dials in the <a href="../tools/control-lab.html#eff">control lab's efficiency section</a>, or see a whole day of energy in <a href="../tools/control-lab.html#day">a day of sun</a>.</p>
+
 <h2>Mode selection and the state machine</h2>
-<p>Once the tracker picks a panel voltage V_ref, the ratio M = V_out / V_ref decides the mode: buck below 0.97, boost above 1.03, buck-boost in between, with 1 % hysteresis so it doesn't chatter at a boundary. If the MPP sits within 2 % of the battery voltage, the controller stops switching and closes the bidirectional bypass switch. It loses a little tracking accuracy and saves all switching loss. A lookup table generated by the loss model sets the switching frequency for each ratio and power band.</p>
-<figure class="figure"><img src="../img/state_machine.svg" alt="Controller state machine: INIT, PRECHARGE, SWEEP, TRACK, BYPASS and FAULT with their transitions" width="944" height="400"><figcaption>The reference controller exists twice, in C (hardware/flagship/control/wf_ctrl.c) and Python. tests/test_control.py runs both in closed loop against the panel model and requires identical output on every tick. Reference only: simulate and review before use.</figcaption></figure>
-<p>See it run in the <a href="../tools/mppt.html">MPPT sandbox</a>.</p>
+<p>Once the tracker picks a panel voltage V_ref, the ratio M = V_out / V_ref decides the mode: buck below 0.97, boost above 1.03, and buck-boost in between. A 1 % hysteresis stops it chattering at a boundary. A lookup table generated by the loss model sets the switching frequency for each ratio and power band, and the hill climb above refines it online.</p>
+<figure class="figure"><img src="../img/state_machine.svg" alt="Controller state machine: INIT, PRECHARGE, SWEEP, TRACK, BYPASS and FAULT with their transitions" width="944" height="400"><figcaption>The reference controller exists in C (hardware/flagship/control/wf_ctrl.c) and Python. tests/test_control.py runs both in closed loop against the panel model and requires identical output on every tick. The algorithm library (wf_mppt.c) is held to the same standard. Reference only: simulate and review before use.</figcaption></figure>
+<p>See the flagship's own controller run tick by tick in the <a href="../tools/mppt.html">MPPT sandbox</a>.</p>
+
+<h2>References</h2>
+<ul class="refs" id="ctl-refs"></ul>
 </div>
 <div class="lessonnav"><a href="devices.html">Lesson 5: devices</a><a href="frontier.html">Lesson 7: the frontier</a></div>
 </main>
-<footer><div class="inner">Watt Forge: open-source converter design, MIT licensed. Runs entirely in your browser: no accounts, no analytics, designs stay in this browser's storage. Every efficiency figure on this site is cited with its test conditions on the <a href="../sources.html">Sources</a> page. Models are predictions, not measurements.</div></footer>
+<footer><div class="inner">
+<div class="cols">
+<div class="about"><a class="brand" href="../index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#1d6b4f"/><path d="M6 21 h5 v-10 h5 v10 h5 v-10 h5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>Watt Forge</a><p>Open-source converter design from first principles: lessons, live loss models, control algorithms and a hybrid GaN buck-boost reference design. Runs entirely in your browser: no accounts, no analytics, no third-party requests.</p></div>
+<div><h4>Learn</h4><ul><li><a href="../learn/fundamentals.html">Fundamentals</a></li><li><a href="../learn/topologies.html">Topologies</a></li><li><a href="../learn/switched-capacitor.html">Switched capacitor</a></li><li><a href="../learn/losses.html">Loss modelling</a></li><li><a href="../learn/devices.html">Devices</a></li><li><a href="../learn/control.html">Control and MPPT</a></li><li><a href="../learn/frontier.html">The frontier</a></li></ul></div>
+<div><h4>Tools</h4><ul><li><a href="../tools/designer.html">Topology designer</a></li><li><a href="../tools/losses.html">Loss budget</a></li><li><a href="../tools/validator.html">Efficiency validator</a></li><li><a href="../tools/devices.html">Si vs GaN vs SiC</a></li><li><a href="../tools/mppt.html">MPPT sandbox</a></li><li><a href="../tools/control-lab.html">Control lab</a></li><li><a href="../tools/spice.html">SPICE runner</a></li></ul></div>
+<div><h4>Project</h4><ul><li><a href="../flagship.html">Flagship design</a></li><li><a href="../sources.html">Sources</a></li><li><a href="../safety.html">Safety note</a></li><li><a data-gh="" href="#">Source code</a></li><li><a data-gh="releases" href="#">Desktop app</a></li><li><a data-repo="docs/SECURITY_MODEL.md" href="#">Security model</a></li></ul></div>
+</div>
+<p class="fine">MIT licensed. Every efficiency figure is cited with its test conditions on the <a href="../sources.html">Sources</a> page. Models are predictions, not measurements: simulate and review before building anything.</p>
+</div></footer>
 <script type="module" src="../js/ui/ui.js"></script>
 <script type="module" src="../js/pages/control-lesson.js"></script>
 </body>

@@ -120,6 +120,17 @@ export function repoLink(path) {
   }
   return null;
 }
+// a[data-gh="releases"] -> https://github.com/<user>/<repo>/releases (repo root when empty)
+function wireGhLinks(root = document) {
+  const host = location.hostname;
+  const repo = location.pathname.split('/').filter(Boolean)[0] || '';
+  for (const a of root.querySelectorAll('a[data-gh]')) {
+    if (host.endsWith('.github.io') && repo) a.href = `https://github.com/${host.replace('.github.io', '')}/${repo}${a.dataset.gh ? '/' + a.dataset.gh : ''}`;
+    else { a.removeAttribute('href'); a.title = 'On the GitHub repository page'; }
+  }
+}
+wireGhLinks();
+
 export function wireRepoLinks(root = document) {
   for (const a of root.querySelectorAll('a[data-repo]')) {
     const url = repoLink(a.dataset.repo);

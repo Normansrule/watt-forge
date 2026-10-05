@@ -1,6 +1,6 @@
 [package]
 name = "watt-forge-desktop"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "MIT"
 description = "Watt Forge desktop shell (Tauri 2): the same web app offline, plus a sandboxed ngspice back end."

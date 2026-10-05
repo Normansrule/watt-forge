@@ -1,55 +1,94 @@
+<div align="center">
+
+<img src="docs/img/favicon.svg" width="72" height="72" alt="Watt Forge logo">
+
 # Watt Forge
 
-**Converter design from first principles, down to the last milliwatt.** An open-source, web-based and downloadable platform that teaches DC-DC converter design from duty cycle to expert-level loss modelling, lets you design and validate converters against an efficiency target, and ends in a complete reference design: a **hybrid three-level GaN buck-boost for solar**.
+**Converter design from first principles, down to the last milliwatt.**
 
-> **Safety.** This is a design and simulation reference, not a build-and-energize guide. Solar and battery hardware is dangerous: high voltage, stored energy, fire. Any physical build is at your own risk and needs proper lab safety practice. Read [SAFETY.md](SAFETY.md).
+Lessons, live loss models, a benchmarked control-algorithm library, and a hybrid GaN buck-boost reference design for solar. All of it open, tested, and running in your browser.
+
+[![CI](https://github.com/Normansrule/watt-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/Normansrule/watt-forge/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Normansrule/watt-forge?display_name=tag&sort=semver&color=1d6b4f)](https://github.com/Normansrule/watt-forge/releases/latest)
+[![Web app](https://img.shields.io/badge/web%20app-live-1d6b4f)](https://normansrule.github.io/watt-forge/)
+[![Desktop](https://img.shields.io/badge/desktop-Linux%20%7C%20Windows%20%7C%20macOS-555)](https://github.com/Normansrule/watt-forge/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-555)](LICENSE)
+
+[**Open the web app**](https://normansrule.github.io/watt-forge/) · [Download the desktop app](https://github.com/Normansrule/watt-forge/releases/latest) · [Lessons](https://normansrule.github.io/watt-forge/learn/fundamentals.html) · [Control lab](https://normansrule.github.io/watt-forge/tools/control-lab.html) · [Flagship design](hardware/flagship/DESIGN_RATIONALE.md)
+
+</div>
 
 ![From a topology choice, through a solar input sweep, to the flagship's loss budget and efficiency curve](docs/img/hero.gif)
 
-## Two ways to use it
+> [!WARNING]
+> **Design and simulation reference, not a build guide.** Solar and battery hardware can injure: high voltage, stored energy, fire. Any physical build is at your own risk and needs proper lab safety practice. Read [SAFETY.md](SAFETY.md).
 
-| | How | What you get |
+## Why Watt Forge
+
+- **Every equation is checked.** Each lesson equation has a worked example that the test suite recomputes. The flagship model is cross-checked against a time-domain circuit simulation and ngspice.
+- **One implementation, three languages.** The physics and control algorithms are written in Python, ported to JavaScript for the browser and to C as a firmware reference. Tests hold the ports to the Python: JavaScript to rounding error, C decision for decision.
+- **Honest numbers.** Every published efficiency figure is cited with its exact test conditions. Estimates are labelled `ESTIMATE`, and predictions are never presented as measurements.
+- **Runs anywhere, private by default.** It is a static site with a strict Content Security Policy and no accounts, analytics or third-party requests. It installs as an offline web app, and the desktop app adds a sandboxed ngspice.
+
+## What's inside
+
+| | What | Where |
 |---|---|---|
-| **Web app** | `https://<your-user>.github.io/watt-forge/` (GitHub Pages, from `docs/`) | Everything runs in the browser: no accounts, no analytics, no third-party requests. Use the browser's **Install app** button and it works offline. |
-| **Desktop app** | Installers on the **Releases** page: Linux `.deb`/`.rpm`/`.AppImage`, Windows `.msi`/`.exe`, macOS `.dmg` | The same site, offline, plus a **live, sandboxed ngspice** SPICE runner. See [desktop/README.md](desktop/README.md). |
+| **Course** | Seven lessons, from duty cycle to the research frontier: topologies, switched-capacitor hybrids, expert loss modelling, Si/GaN/SiC devices, control and MPPT | [`docs/learn/`](https://normansrule.github.io/watt-forge/learn/fundamentals.html) |
+| **Tools** | Topology designer, loss-budget explorer, efficiency-curve validator, device comparison, MPPT sandbox, **control lab**, SPICE runner | [`docs/tools/`](https://normansrule.github.io/watt-forge/tools/designer.html) |
+| **Control library** | Eight MPPT algorithms and four efficiency controls, benchmarked on EN 50530-style tests | [`watt_forge/control/`](watt_forge/control/), [`wf_mppt.c`](hardware/flagship/control/wf_mppt.c) |
+| **Flagship design** | 400 W hybrid three-level GaN buck-boost, 12-60 V panel to a 48 V battery: schematic, BOM, loss model, simulations, controller, modulator | [`hardware/flagship/`](hardware/flagship/) |
+| **Desktop app** | Tauri 2: the same site offline, plus live sandboxed ngspice | [`desktop/`](desktop/) |
 
-To publish both from a blank Ubuntu terminal with one paste, see [docs/PUBLISH.md](docs/PUBLISH.md).
+## Control library <sup>new in 0.2</sup>
 
-## What is inside
+Eight maximum power point tracking (MPPT) algorithms run on the same simulated panel, sensors and test profiles. The panel is a 72-cell model with bypass diodes, the input-voltage loop has dynamics, and the sensors add noise and 12-bit quantisation. Every tracker gets the same parameter tuning, on a profile that is never used for scoring. The score is **dynamic MPPT efficiency** as EN 50530 defines it: energy drawn divided by energy available at the global maximum power point. Each result is the mean of three noise seeds.
 
-| Part | Where | What it does |
-|---|---|---|
-| **The course** (7 lessons) | `docs/learn/` | Fundamentals, the core topologies, switched-capacitor and hybrid converters, loss modelling, devices (Si/GaN/SiC and bidirectional GaN), control and MPPT, and the research frontier. Every equation gets intuition, symbols and units, a worked example the test suite checks, and an interactive visual. |
-| **Six tools** | `docs/tools/` | Topology designer (sizes L and C, finds duty, estimates every loss), loss-budget explorer, efficiency-curve validator, Si vs GaN vs SiC comparison with a thermal estimate, MPPT sandbox, and the SPICE runner (netlists behind the numbers; live ngspice in the desktop app). |
-| **Physics library** | `watt_forge/` | Ratios, balance laws, CCM/DCM, every loss primitive, Steinmetz/iGSE, switched-capacitor SSL/FSL, weighted efficiency, a PV panel model, and the generic designer. Ported line-for-line to `docs/js/model/` and parity-tested. |
-| **Flagship design** | `watt_forge/flagship/`, `hardware/flagship/` | Topology, parameters, analytic loss model, time-domain circuit simulation, ngspice cross-check, design exploration, BOM, schematic, spreadsheet, notebook, reference controller (C) and modulator (Verilog). |
-| **Desktop** | `desktop/` | Tauri 2 app around the same site, plus a sandboxed ngspice back end guarded by `netlist-guard` (Rust). Built, packaged and smoke-tested end to end. |
+| Tracker | Family | EN 50530-style 30-100 % | 10-50 % | Clouds | Partial shading | Steady | Overall |
+|---|---|---:|---:|---:|---:|---:|---:|
+| Particle swarm + variable-step P&O | Global search | 99.77 % | 99.70 % | 98.04 % | 99.23 % | 99.62 % | **99.51 %** |
+| Global scan + variable-step P&O | Global search | 99.70 % | 99.65 % | 97.35 % | 99.04 % | 99.55 % | **99.36 %** |
+| Perturb & observe, fixed step | Hill climbing | 99.93 % | 99.86 % | 99.15 % | 79.54 % | 99.94 % | **97.61 %** |
+| Incremental conductance, variable step | Hill climbing | 99.88 % | 99.83 % | 99.47 % | 79.50 % | 99.91 % | **97.61 %** |
+| Incremental conductance, fixed step | Hill climbing | 99.89 % | 99.84 % | 98.67 % | 79.51 % | 99.93 % | **97.54 %** |
+| Extremum seeking (injected dither) | Gradient | 99.83 % | 99.76 % | 99.76 % | 78.77 % | 99.83 % | **97.51 %** |
+| Perturb & observe, variable step | Hill climbing | 99.89 % | 99.84 % | 97.76 % | 79.49 % | 99.92 % | **97.44 %** |
+| Fractional open-circuit voltage | Model based | 98.90 % | 99.47 % | 97.95 % | 77.92 % | 97.75 % | **96.61 %** |
 
-## The core topologies, animated
+![Partial shading: local trackers stay on the wrong power peak, global search finds the right one](docs/img/mppt_shading.png)
 
-Each animation shows the current path in each switch state (dashes flow with the current) and the switch-node voltage and inductor current, with a cursor.
+**What the benchmark says:**
 
-| Buck | Boost |
-|---|---|
-| ![Animated synchronous buck](docs/img/anim_buck.svg) | ![Animated synchronous boost](docs/img/anim_boost.svg) |
-| **Inverting buck-boost** | **Flagship three-level leg** |
-| ![Animated inverting buck-boost](docs/img/anim_buck_boost.svg) | ![Animated three-level flying-capacitor leg](docs/img/anim_flagship.svg) |
+- **On slow ramps and in steady light**, every hill climber reaches 99.8-99.9 %.
+- **Partial shading** separates the global methods from the rest, by about 20 points.
+- **Cloud edges** reward extremum seeking and variable-step incremental conductance, and punish anything that restarts a global search at every edge.
 
-SEPIC, Cuk, flyback and four-switch animations are in `docs/img/` and lesson 2.
+The flagship uses global scan. Particle swarm edges it out here, but the scan has fewer parameters and no random numbers, so its worst case is easier to bound.
+
+**Efficiency controls** on the flagship loss model:
+
+- **Adaptive switching frequency** and **adaptive dead time** are online hill climbs. They see the loss only through power measurements, at the resolution the converter's sensors give after averaging 5 s of readings (about 25-35 mW). Results are means over 20 noise trials.
+- **Burst mode** and **bypass** are design-time rules worked out with the model. Burst mode pays for the panel ripple it causes, and bypass pays for pinning the panel at battery voltage.
+
+At 40 V and 20 W (5 % load), the two climbs cut converter loss from 1.04 W to 0.92 W, and burst mode takes it to 0.55 W. Much of that last step comes from idling housekeeping supplies between bursts, which is an estimate. Near full load the controls save a tenth of a watt or nothing, except near V_in = V_out, where adaptive frequency alone saves about half a watt. At full load, noise occasionally moves the dead-time climb off an optimum it started on, costing 0.4 mW on average. The frequency climb usually finds the optimum, while the dead-time climb usually stops short because the remaining gain is below what the sensors can resolve.
+
+Over a modelled clear day the controls recover 1.5 Wh of 2,117 Wh: 1.0 Wh from frequency, 0.16 Wh from dead time and 0.30 Wh from burst mode. That is small, because the converter already sits near 99 % most of the day.
+
+![Loss vs switching frequency and dead time, with fixed settings and where the online hill climb lands](docs/img/efficiency_controls.png)
+
+Race them yourself in the [control lab](https://normansrule.github.io/watt-forge/tools/control-lab.html). The method, equations and references are in [lesson 6](https://normansrule.github.io/watt-forge/learn/control.html).
 
 ## The flagship: hybrid three-level GaN buck-boost for solar
 
 ![Annotated power-stage schematic](docs/img/flagship_schematic.svg)
 
-**12-60 V panel to a 40-58 V (48 V) battery, 400 W, maximum power point tracking.** A four-switch buck-boost whose half-bridges are replaced by **three-level flying-capacitor legs** on 100 V GaN (EPC2361):
+**12-60 V panel to a 40-58 V (48 V) battery, 400 W, with MPPT.** It is a four-switch buck-boost whose half-bridges are replaced by three-level flying-capacitor legs on 100 V GaN (EPC2361):
 
 - **Half the blocking voltage.** Each switch blocks Vbus/2.
-- **Up to 4x less ripple.** The switch node steps in half-size steps at twice the switching frequency.
-- **A built-in switched-capacitor stage.** At Vout = 2 Vin the leg is a soft-charged 2:1 SC converter with near-zero inductor ripple.
+- **Up to 4x less ripple.** The switch node steps in half-size steps at twice the frequency.
+- **A built-in switched-capacitor stage.** At Vout = 2 Vin the leg is a soft-charged 2:1 SC converter.
 
-A monolithic **bidirectional GaN switch** (Innoscience INV100FQ030C) disconnects the panel in both directions, and another bypasses conversion entirely when the panel's maximum power point already sits at battery voltage.
-
-![Predicted efficiency vs input voltage](docs/img/eff_vs_vin.png)
+A monolithic bidirectional GaN switch (Innoscience INV100FQ030C) disconnects the panel in both directions. A second one bypasses conversion when the panel already sits at battery voltage.
 
 | Operating point (model) | Mode | f | Loss | Efficiency |
 |---|---|---|---|---|
@@ -59,98 +98,85 @@ A monolithic **bidirectional GaN switch** (Innoscience INV100FQ030C) disconnects
 | 12 V -> 48 V, 175 W | boost | 75 kHz | 4.69 W | 97.39 % |
 | 48 V, 400 W | bypass | - | 1.07 W | 99.73 % |
 
-All efficiencies include 0.55 W of housekeeping. CEC-weighted efficiency is 97.5 % at 12 V, 98.8 % at 24 V, 99.1 % at 36 V and 99.25 % at 56 V.
+![Predicted efficiency vs input voltage](docs/img/eff_vs_vin.png)
 
-**How much to trust these numbers.** Three independent calculations agree:
+**How much to trust these numbers.** Three independent calculations agree: the analytic model; a time-domain circuit simulation within 0.15 points; and ngspice within 5e-5. That proves the arithmetic, not the hardware. The best *measured* GaN buck-boost results we could verify are 99.0 % (TI TIDA-010949, control power excluded) and 99.3 % (Heydari et al., APEC 2023). Treat predictions above about 99.3 % as claims awaiting a prototype.
 
-- the analytic model, edge by edge;
-- a time-domain circuit simulation (exact piecewise-linear periodic steady state, dead time, reverse conduction, unbalanced flying capacitors), within 0.15 points of the model;
-- ngspice, within 5e-5 of the simulation.
-
-That proves the arithmetic, not the hardware. The best *measured* GaN buck-boost results we could verify are 99.0 % (TI TIDA-010949, control power excluded) and 99.3 % (Heydari et al., APEC 2023). Treat predictions above ~99.3 % as claims awaiting a prototype. Every assumption that is an estimate is labelled `ESTIMATE` in `watt_forge/flagship/params.py`.
-
-**Where the physics says no:**
+<details>
+<summary><b>Where the physics says no, and the full deliverables list</b></summary>
 
 - **Low input voltage.** At 12 V the converter carries 15 A through four series switches, the inductor and the disconnect, which caps it near 97.4 %.
-- **Light load.** Housekeeping dominates.
+- **Light load.** Housekeeping dominates; burst mode recovers part of it (see above).
 - **Vin = Vout.** Both legs switch, which costs a dip; bypass removes it.
 
+Deliverables: [design rationale](hardware/flagship/DESIGN_RATIONALE.md); [BOM](hardware/flagship/BOM.csv) with real part numbers and a verification status per line; [loss-model spreadsheet](hardware/flagship/loss_model.xlsx) with live formulas; [notebook](notebooks/loss_model.ipynb); [ngspice netlist](hardware/flagship/spice/flagship_buck_56V_400W.cir); the reference controller in [C](hardware/flagship/control/wf_ctrl.c) (identical to Python on every tick of a 6,200-tick closed-loop test); and the three-level modulator in [Verilog](hardware/flagship/hdl/wf_pwm3l.v) with a self-checking testbench. Reference code: simulate and review before use.
+
 ![Loss budget at three operating points](docs/img/loss_budget.png)
-
 ![Si vs GaN vs SiC in the same converter](docs/img/device_compare.png)
-
-![Controller state machine](docs/img/state_machine.svg)
-
-The controller exists twice, in C (`hardware/flagship/control/wf_ctrl.c`) and Python. `tests/test_control.py` runs both in closed loop with the PV model and requires byte-identical output on all 6,200 ticks. The MPPT holds over 99.5 % of the available power in steady sun and finds the global maximum under partial shading. The three-level modulator `hardware/flagship/hdl/wf_pwm3l.v` has a self-checking testbench for shoot-through, dead time, duty, phase, bypass break-before-make and the fault latch. That testbench caught a real counter-saturation bug.
-
-**Flagship deliverables:**
-
-- [Design rationale](hardware/flagship/DESIGN_RATIONALE.md)
-- [BOM](hardware/flagship/BOM.csv) with real part numbers and a verification status per line
-- [Loss-model spreadsheet](hardware/flagship/loss_model.xlsx) with live formulas that match the Python model to 0.003 W
-- [Notebook](notebooks/loss_model.ipynb)
-- [ngspice netlist](hardware/flagship/spice/flagship_buck_56V_400W.cir)
-- Reference C and Verilog (simulate and review before use)
+</details>
 
 ## The frontier, kilovolts to phone-level
 
 ![Topology map](docs/img/topology_map.png)
 
-Hybrid switched-capacitor, flying-capacitor multilevel and **piezoelectric-resonator** (magnetics-less) converters, each cited with its exact test conditions in [docs/REFERENCES.md](docs/REFERENCES.md) (last verified 2026-09-30). Some commonly quoted figures turned out to be something else, and the references page says so:
+The frontier lesson covers hybrid switched-capacitor, flying-capacitor multilevel and **piezoelectric-resonator** (magnetics-less) converters. Each is cited with its exact test conditions in [docs/REFERENCES.md](docs/REFERENCES.md). Where a commonly quoted figure turned out to be something else, the references say so.
 
-- a 99.2 % that is a PV energy-harvest ratio, not converter efficiency;
-- a 96-97 % that could not be verified (the closest real paper reports 92.5 %);
-- a >99 % that appears to be calculated, not measured.
+## Get started
 
-## Quick start
+**Use it:** open the [web app](https://normansrule.github.io/watt-forge/) (your browser's *Install app* makes it work offline). Or download an installer from [Releases](https://github.com/Normansrule/watt-forge/releases/latest): `.deb`, `.rpm` or `.AppImage` for Linux, `.msi` or `.exe` for Windows, `.dmg` for macOS.
+
+**Develop:**
 
 ```bash
-git clone https://github.com/<you>/watt-forge && cd watt-forge
+git clone https://github.com/Normansrule/watt-forge && cd watt-forge
 python3 -m pip install --require-hashes -r requirements.lock && python3 -m pip install --no-deps -e .
-sudo apt-get install ngspice iverilog     # optional: enables the ngspice and HDL tests
-make test                                 # pytest + JS parity + JS/Rust netlist guards
-python3 -m http.server -d docs 8000       # then open http://localhost:8000
+sudo apt-get install ngspice iverilog     # optional: ngspice and HDL tests
+make test                                 # Python, JavaScript parity, guards and control library, Rust
+python3 -m http.server -d docs 8000       # the site at http://localhost:8000
 ```
 
-`make data figures site` regenerates the design exploration, web data, charts, animations and pages from source. `make spice` re-runs the SPICE runner presets in ngspice, and `make desktop` builds the desktop installers (see [desktop/README.md](desktop/README.md)).
+| Command | What it regenerates |
+|---|---|
+| `make data figures site` | Design exploration, web data, charts, animations, pages |
+| `make tune` then `make control` | MPPT tuning, benchmark, efficiency controls, daily energy (about 15 min) |
+| `make spice` | ngspice results shown by the SPICE runner |
+| `make desktop` | Desktop installers ([desktop/README.md](desktop/README.md)) |
 
-## Repository map
+Publishing from a blank Ubuntu terminal takes one paste: [docs/PUBLISH.md](docs/PUBLISH.md).
+
+<details>
+<summary><b>Repository layout</b></summary>
 
 ```
-watt_forge/            physics library + flagship (params, pwm, model, sim, control, design)
-docs/                  GitHub Pages site (built from site/ by scripts/build_site.py), images, data, docs
-  js/model/            browser port of the models (parity-tested)    js/pages/  one module per page
+watt_forge/            physics library
+  flagship/            flagship params, PWM, loss model, circuit simulation, controller, design exploration
+  control/             MPPT trackers, closed-loop bench, profiles, efficiency controls
+site/                  page sources -> docs/*.html (scripts/build_site.py)
+docs/                  the GitHub Pages site and the desktop app's UI
+  js/model/            browser ports (parity-tested)   js/pages/  one module per page   js/workers/  benchmark worker
   REFERENCES.md  SECURITY_MODEL.md  EQUATIONS.md  PUBLISH.md
 hardware/flagship/     DESIGN_RATIONALE.md, BOM.csv, loss_model.xlsx, control/ (C), hdl/ (Verilog), spice/
-desktop/               netlist-guard (Rust, tested) + src-tauri (Tauri 2 app, smoke-tested)
-data/                  devices.json (datasheet values + verification flags), references.json, generated results
-tests/                 123 Python tests + JS parity (1,751 checks) + JS guard (25 checks) + Rust tests
+desktop/               Tauri 2 app + netlist-guard (Rust)
+data/                  devices, references, tuned parameters, generated results
+scripts/               every generator (data, charts, site, icons, ZIP)
+tests/                 Python tests + JS parity fixtures and checks
 ```
+</details>
 
-## Reference repos and tools
+## Verification
 
-| Repo / tool | What we borrow or use |
+| Suite | What it proves |
 |---|---|
-| [ngspice](https://ngspice.sourceforge.io) | Open SPICE engine: desktop back end and cross-check of the Python circuit simulation (run as an external program) |
-| [KiCad](https://gitlab.com/kicad/code/kicad) | Schematic and BOM conventions for the reference design |
-| [Apache ECharts](https://github.com/apache/echarts) / [plotly.js](https://github.com/plotly/plotly.js) | Considered for charts; the site ships its own small SVG charts to keep a strict CSP with zero third-party scripts |
-| PLECS-style loss tables / open converter models | The modelling pattern of the circuit simulation (circuit solved exactly, switching energies added per event); no code borrowed |
-| IEEE TPEL / APEC / COMPEL papers | Topology and loss references, all cited by DOI in [docs/REFERENCES.md](docs/REFERENCES.md) |
+| `pytest` (154 tests) | Worked examples; model vs circuit simulation vs ngspice; C == Python for the flagship controller, all eight trackers and the online optimiser; HDL testbench; site security; data freshness |
+| `node tests/js/parity.mjs` (1,751 checks) | Browser physics == Python physics |
+| `node tests/js/control.mjs` (1,098 checks) | Browser control library == Python, decision for decision |
+| `node tests/js/guard.mjs` + `cargo test` | One netlist-guard rule set in Python, JavaScript and Rust |
+| Desktop smoke test | Page -> IPC -> guard -> ngspice, in the packaged app, on every release build |
 
-## Milestones
+## Project
 
-| Milestone | Status |
-|---|---|
-| 1. MVP: fundamentals, buck/boost/buck-boost lessons with animations, loss-budget explorer, sources | Done |
-| 2. Switched-capacitor and hybrid topologies, Si/GaN/SiC comparison, efficiency-curve validator | Done |
-| 3. Flagship: schematic, BOM, loss model, simulation, MPPT sandbox, reference control code | Done (model-level; no hardware built) |
-| 4. Frontier library including piezoelectric converters; web and desktop parity | Done. The desktop app is built and smoke-tested, and the SPICE runner page runs ngspice live in it (stored results on the web). The web app installs and works offline |
-| 5. Hardening: independent accuracy review, simulator security review, signed releases | Review and security model done. Pushing a `v*` tag publishes one release: source ZIP, SBOM, installers for three OSes, `SHA256SUMS` and Sigstore provenance |
-
-## Security
-
-The site is static and local-first, with a strict CSP and no `eval`. Imported designs and netlists are treated as untrusted, CI uses hash-pinned dependencies and SHA-pinned Actions, and releases ship with an SBOM, checksums and Sigstore provenance. Details: [docs/SECURITY_MODEL.md](docs/SECURITY_MODEL.md).
-
-## License
-
-MIT for code. Cited papers remain their publishers' copyright: they are referenced, never reproduced.
+- **Contributing:** see [CONTRIBUTING.md](CONTRIBUTING.md). Cite with conditions, keep the three implementations in step, and commit generated files.
+- **Security:** report vulnerabilities privately as described in [SECURITY.md](SECURITY.md). The threat model is [docs/SECURITY_MODEL.md](docs/SECURITY_MODEL.md). Releases ship with an SBOM, checksums and Sigstore provenance, and every Action is pinned by commit SHA.
+- **Citing:** use [CITATION.cff](CITATION.cff) (GitHub's *Cite this repository* button).
+- **Changes:** see [CHANGELOG.md](CHANGELOG.md).
+- **License:** MIT for code. Cited papers remain their publishers' copyright: they are referenced, never reproduced. Fonts: Inter and JetBrains Mono (SIL OFL 1.1).

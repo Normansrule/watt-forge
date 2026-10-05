@@ -1,0 +1,19 @@
+name: Feature or topic request
+description: A new lesson, tool, algorithm, topology or reference
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like added?
+    validations: { required: true }
+  - type: textarea
+    id: why
+    attributes:
+      label: Why, and for whom?
+      description: Who learns or designs better with it?
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources
+      description: Papers (with DOI), datasheets or standards it should be based on.

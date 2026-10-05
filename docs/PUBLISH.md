@@ -14,18 +14,19 @@ What it does, in order:
 1. Installs `git`, the GitHub CLI (`gh`) and `unzip` with apt. This is the only `sudo`.
 2. Logs in to GitHub if needed, with the `workflow` scope.
 3. Finds `watt-forge.zip` in `~/Downloads`, or in the Windows Downloads folder under WSL. It unzips into `~/projects/<repo>`, never into your home folder itself.
-4. Commits, creates the GitHub repository, pushes to `main` and enables GitHub Pages from `/docs`.
-5. Tags `VERSION` and pushes the tag. The `release` workflow then builds the installers, which takes about 15–25 minutes.
-6. Prints the web app URL and the release URL.
+4. Creates the GitHub repository if needed. If GitHub already has commits (an earlier publish, or Dependabot pull requests you merged), it commits on top of them: the ZIP's files win and the history is kept, so the push never fails as non-fast-forward.
+5. Pushes to `main`, keeps GitHub Pages on `/docs`, and sets the repository's homepage link, description and topics. It also turns on private vulnerability reporting.
+6. Tags `VERSION` and pushes the tag. The `release` workflow then builds the installers, which takes about 15–25 minutes.
+7. Prints the web app URL and the release URL, plus the one manual step: uploading the social-preview image, which GitHub offers no API for.
 
 It is safe to re-run. Existing repos, remotes, Pages settings and tags are reused, and a re-run with a newer ZIP commits only what changed. To ship a new desktop build later, set `VERSION` to the next number (for example `v0.1.1`) and paste again.
 
 ```bash
 GH_USER="Normansrule"                    # your GitHub username
-REPO="watt-forge"                        # repository name to create
+REPO="watt-forge"                        # repository name
 GIT_NAME="Aleksander Norman"             # name for the commit
 GIT_EMAIL="aleksanderjnorman@gmail.com"  # email for the commit
-VERSION="v0.1.0"                         # desktop release tag; bump it to ship a new desktop build
+VERSION="v0.2.0"                         # release tag; bump it to ship a new desktop build
 (
 set -euo pipefail
 # 1. Install git, the GitHub CLI and unzip (the only sudo in this script)
@@ -43,28 +44,36 @@ ZIP="$HOME/Downloads/watt-forge.zip"; [ -f "$ZIP" ] || ZIP="$(ls -t /mnt/c/Users
 # 6. Unzip into ~/projects/$REPO (never into ~ itself; existing files are updated in place)
 DEST="$HOME/projects/$REPO"; [ "$DEST" != "$HOME" ] && mkdir -p "$DEST" && TMP="$(mktemp -d)" && unzip -q -o "$ZIP" -d "$TMP" && cp -a "$TMP"/watt-forge/. "$DEST"/ && rm -rf "$TMP"
 # 7. Enter the project and confirm it is the right folder
-cd "$DEST" && [ -f watt_forge/flagship/model.py ] && [ -f desktop/src-tauri/tauri.conf.json ] || { echo "unexpected folder contents in $DEST"; exit 1; }
-# 8. Create the repository locally on branch main (only the first time)
+cd "$DEST" && [ -f watt_forge/control/mppt.py ] && [ -f desktop/src-tauri/tauri.conf.json ] || { echo "unexpected folder contents in $DEST"; exit 1; }
+# 8. Create the repository locally on branch main (only the first time), and make sure we are on main
 [ -d .git ] || git init -b main
+git symbolic-ref HEAD refs/heads/main
 # 9. Set the commit identity for this repository only
 git config user.name "$GIT_NAME" && git config user.email "$GIT_EMAIL"
-# 10. Commit everything (first commit, or only what changed on a re-run)
-git add -A && { git diff --cached --quiet || git commit -m "Watt Forge: converter design platform (web + desktop) and hybrid GaN buck-boost reference design"; }
-# 11. Create the GitHub repository if it does not exist yet
-gh repo view "$GH_USER/$REPO" >/dev/null 2>&1 || gh repo create "$GH_USER/$REPO" --public --description "Converter design from first principles: loss models, tools, a hybrid GaN buck-boost reference design. Web app + desktop app."
-# 12. Point origin at it (works on re-runs too)
+# 10. Create the GitHub repository if it does not exist yet
+gh repo view "$GH_USER/$REPO" >/dev/null 2>&1 || gh repo create "$GH_USER/$REPO" --public --description "Converter design from first principles: lessons, loss models, MPPT and efficiency controls, and a hybrid GaN buck-boost reference design. Web + desktop app."
+# 11. Point origin at it (works on re-runs too)
 git remote add origin "https://github.com/$GH_USER/$REPO.git" 2>/dev/null || git remote set-url origin "https://github.com/$GH_USER/$REPO.git"
-# 13. Push to main
+# 12. If GitHub already has commits (an earlier publish, merged Dependabot PRs), build on top of them: the ZIP's files win, history is kept
+git fetch --quiet origin main 2>/dev/null && git reset --soft origin/main || true
+# 13. Commit everything (only what changed)
+git add -A && { git diff --cached --quiet || git commit -m "Watt Forge $VERSION: control-algorithm library, control lab, site and repository polish"; }
+# 14. Push to main
 git push -u origin main
-# 14. Web app: enable GitHub Pages from /docs on main (create, or update if already enabled)
+# 15. Web app: enable GitHub Pages from /docs on main (create, or update if already enabled)
 gh api -X POST "repos/$GH_USER/$REPO/pages" -f "source[branch]=main" -f "source[path]=/docs" >/dev/null 2>&1 || gh api -X PUT "repos/$GH_USER/$REPO/pages" -f "source[branch]=main" -f "source[path]=/docs" >/dev/null
-# 15. Desktop app: tag this version (skipped if the tag already exists) ...
+# 16. Repository page: homepage link, description and topics
+gh repo edit "$GH_USER/$REPO" --homepage "https://${GH_USER,,}.github.io/$REPO/" --description "Converter design from first principles: lessons, loss models, MPPT and efficiency controls, and a hybrid GaN buck-boost reference design. Web + desktop app." --add-topic power-electronics,dc-dc-converter,mppt,solar,gallium-nitride,buck-boost,education,simulation,tauri,ngspice >/dev/null
+# 17. Turn on private vulnerability reporting (SECURITY.md points people to it)
+gh api -X PUT "repos/$GH_USER/$REPO/private-vulnerability-reporting" >/dev/null 2>&1 || echo "note: enable private vulnerability reporting under Settings > Security if this step was refused"
+# 18. Desktop app: tag this version (skipped if the tag already exists) ...
 git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null || git tag -a "$VERSION" -m "Watt Forge $VERSION"
-# 16. ... and push the tag, which starts the release workflow (Linux, Windows and macOS installers)
+# 19. ... and push the tag, which starts the release workflow (Linux, Windows and macOS installers)
 git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null 2>&1 || git push origin "$VERSION"
-# 17. Print where both forms will appear (Pages takes 1-2 minutes; the desktop release about 15-25)
+# 20. Print where everything appears (Pages updates in 1-2 minutes; the desktop release takes about 15-25)
 echo "Web app:      $(gh api "repos/$GH_USER/$REPO/pages" -q .html_url 2>/dev/null || echo "https://${GH_USER,,}.github.io/$REPO/")"
 echo "Desktop app:  https://github.com/$GH_USER/$REPO/releases/tag/$VERSION   (build progress: https://github.com/$GH_USER/$REPO/actions)"
+echo "One manual step: Settings > General > Social preview > upload docs/img/social-preview.png"
 )
 ```
 
@@ -79,7 +88,7 @@ The `.deb` declares ngspice as a dependency, so apt installs it too. On WSL2, Wi
 ```bash
 GH_USER="Normansrule"                    # your GitHub username
 REPO="watt-forge"                        # repository name
-VERSION="v0.1.0"                         # release tag to install from
+VERSION="v0.2.0"                         # release tag to install from
 (
 set -euo pipefail
 # 1. System packages: ngspice, plus what a local build would need (the only sudo, apart from installing the .deb)

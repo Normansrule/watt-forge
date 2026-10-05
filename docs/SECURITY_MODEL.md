@@ -12,6 +12,8 @@ Watt Forge is a static, local-first web app with an optional desktop shell. This
 | App to storage | saved designs | `localStorage` under the `wattforge:` prefix, wrapped so blocked storage never breaks the page. It is per browser, never sent anywhere, and clearing site data removes it. |
 | Netlist to simulator (desktop) | untrusted SPICE netlists | See the next section. |
 | Browser cache (installable web app) | the site's own files | `sw.js` precaches the site under a cache name derived from a hash of every file, so a new deploy replaces the old cache. It handles same-origin `GET` requests only, and registers only over HTTPS or on localhost, never inside the desktop app. |
+| Control lab (web and desktop) | tracker parameters, profile choice | Parameters are numbers from range sliders, passed to the trackers' constructors, which reject unknown names. The benchmark runs in a same-origin module Web Worker (`docs/js/workers/control-worker.js`, allowed by `worker-src 'self'`) that only computes and posts results back. It has no network or storage access beyond the site's own modules. |
+| Fonts | Inter and JetBrains Mono | Self-hosted under `docs/fonts/` (SIL OFL 1.1, licence files alongside), so `font-src 'self'` holds and no font service learns who visits. |
 | SPICE runner page (web) | an edited netlist | Checked by the JavaScript port of the guard for feedback only. The web version never executes a netlist; it shows ngspice results stored at build time for unmodified presets. |
 
 ## Malicious netlists (desktop and Python runner)
